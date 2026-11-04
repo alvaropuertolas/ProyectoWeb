@@ -1,13 +1,20 @@
 body {
-  font-family: sans-serif;
+  font-family: Helvetica;
   margin: 40px;
+  background-color: #333333;
+  color: #f0f0f0;
+  letter-spacing: -0.02em;
 }
 
 h1 {
-  color: #6276f7;
+  color: #ff5a36;
+  font-size: 4rem;
 }
 
 button {
   padding: 8px 16px;
   cursor: pointer;
+  font: inherit;
+  background-color: #ff5a36;
+  border: none;
 }

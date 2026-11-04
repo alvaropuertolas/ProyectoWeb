@@ -1,24 +1,32 @@
-# Context del projecte
+# Contexto del proyecto
 
-## Informació general
-- **Repositori:** `Paladini-Elisava/Projecte-Inicial`
-- **Branca consultada:** `main`
-- **Tecnologies:** HTML, CSS i JavaScript natius.
+## Qué es
+Página web de un proyecto académico de Elisava. Una sola página con HTML, CSS y JavaScript nativos. Sin frameworks, sin `package.json` y sin proceso de compilación.
 
-## Fitxers principals
-### `index.html`
-Defineix una pàgina en castellà amb un títol, una frase descriptiva, un botó i un paràgraf ocult que conté una pregunta de recerca provisional. Carrega `style.css` i `script.js`.
+- **Repositorio:** `alvaropuertolas/ProyectoWeb` (plantilla original: `Paladini-Elisava/Projecte-Inicial`).
+- **Rama:** `main`.
 
-### `style.css`
-Aplica una tipografia sans-serif, un marge general de 40 píxels, el color blau al títol i espaiat al botó.
+## Contenido actual
+- **Título:** "Algoritmo vs. Voluntad: La batalla por mi atención".
+- **Descripción:** "Un viaje por mi historial de Youtube para descubrir cuánto tiempo me roba el algoritmo".
+- **Botón:** "Ver mi pregunta"; muestra u oculta la pregunta de investigación.
+- **Pregunta:** "¿Consumo lo que yo decido buscar o lo que la página de inicio me sirve en bandeja?".
 
-### `script.js`
-Selecciona els elements `#boton` i `#texto`. Quan es clica el botó, alterna la propietat `hidden` del text.
+## Archivos
+- `index.html`: estructura y contenido de la página.
+- `style.css`: estilos. Sans-serif, margen de 40 px, título azul `#6276f7`, botón con padding y cursor pointer.
+- `script.js`: alterna el atributo `hidden` del párrafo al pulsar `#boton`.
+- `README.md`: solo el título del repositorio.
+- `personalidad.md`: cómo debe trabajar el asistente.
+- `criterio.md`: reglas de decisión.
+- `log.md`: registro de cambios.
+- `memoria.md`: memoria inicial del proyecto, anterior a estos documentos.
 
-### `README.md`
-Actualment conté només el títol del projecte.
+## Estado
+- La página es funcional: el botón muestra y oculta la pregunta.
+- Contenido principal personalizado; pendiente revisar el diseño visual y cerrar los textos si el proyecto lo pide.
+- No hay tests ni build.
 
-## Consideracions
-- El contingut de la pàgina encara inclou textos de mostra.
-- No s'ha identificat cap `package.json`; el projecte no sembla requerir un procés de compilació basat en Node.js.
-- Aquest document descriu els fitxers revisats i s'ha d'actualitzar quan canviï l'estructura.
+## Restricciones
+- Es una plantilla del profesor: solo se cambian los textos que se piden. Nada de añadidos no solicitados.
+- Los documentos de contexto se actualizan cuando cambia el proyecto.
