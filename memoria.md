@@ -1,19 +1,22 @@
-# Memòria del projecte
+# Memoria del proyecto
 
-## Objectiu
-Aquest projecte és una pàgina web inicial creada amb HTML, CSS i JavaScript. El contingut actual és una plantilla que cal adaptar a l'objectiu definitiu del projecte.
+> Estado y decisiones del proyecto, para retomarlo sin contexto previo.
 
-## Estructura actual
-- `index.html`: estructura i contingut de la pàgina.
-- `style.css`: estils visuals.
-- `script.js`: comportament interactiu del botó.
+## Qué es
+Página web de una sola página, con HTML, CSS y JavaScript nativos. Sin frameworks, sin `package.json` y sin proceso de compilación. Proyecto académico de Elisava.
 
-## Decisions actuals
-- Mantenir una estructura senzilla, sense frameworks.
-- Separar HTML, CSS i JavaScript en fitxers diferents.
-- Mostrar o amagar la pregunta de recerca mitjançant el botó de la pàgina.
+## Tema
+"Algoritmo vs. Voluntad: La batalla por mi atención". Un recorrido por el historial de YouTube para ver cuánto tiempo se pierde por el algoritmo, y la pregunta de investigación: "¿Consumo lo que yo decido buscar o lo que la página de inicio me sirve en bandeja?".
 
-## Pendents
-- Definir el títol, la descripció i la pregunta de recerca definitius.
-- Adaptar el disseny visual a les necessitats del projecte.
-- Completar aquesta memòria quan es concreti l'objectiu final.
+## Decisiones
+- Mantener la estructura simple de la plantilla: HTML, CSS y JavaScript en archivos separados.
+- El botón "Ver mi pregunta" muestra u oculta la pregunta de investigación.
+- Diseño oscuro: fondo `#333333`, texto claro, tipografía Helvetica y título azul `#6276f7`.
+
+## Estado
+- La página es funcional y ya tiene el contenido propio del proyecto.
+- Sin tests y sin build: se comprueba abriendo `index.html` en el navegador.
+
+## Pendientes
+- Revisar el diseño visual.
+- Cerrar los textos definitivos si el proyecto lo pide.

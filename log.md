@@ -29,6 +29,11 @@ Reglas:
 
 ---
 
+## 2026-11-10 — Memoria actualizada
+- **Cambios:** `memoria.md` reescrito en castellano y actualizado al estado actual; retoque de una línea en `contexto.md`.
+- **Motivo:** dejar los cuatro documentos (contexto, criterio, personalidad y memoria) coherentes para la revisión del profesor.
+- **Verificación:** contenido contrastado con `index.html`, `style.css`, `script.js` y `log.md`.
+
 ## 2026-11-04 — Fondo oscuro y tipografía Helvetica
 - **Cambios:** fondo gris oscuro (`#333333`), texto claro (`#f0f0f0`), tipografía Helvetica y `letter-spacing: -0.02em` en `style.css`. Se mantiene el azul del `h1`.
 - **Motivo:** quitar el fondo blanco y concentrar un poco el texto.

@@ -20,7 +20,7 @@ Página web de un proyecto académico de Elisava. Una sola página con HTML, CSS
 - `personalidad.md`: cómo debe trabajar el asistente.
 - `criterio.md`: reglas de decisión.
 - `log.md`: registro de cambios.
-- `memoria.md`: memoria inicial del proyecto, anterior a estos documentos.
+- `memoria.md`: estado y decisiones del proyecto.
 
 ## Estado
 - La página es funcional: el botón muestra y oculta la pregunta.
