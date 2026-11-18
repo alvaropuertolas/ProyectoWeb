@@ -3,17 +3,42 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Mi proyecto</title>
+  <title>Alvaro Puertolas — Algoritmo vs. Voluntad</title>
   <!-- El nombre tiene que coincidir con el del archivo: style.css -->
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-  <h1>Algoritmo vs Voluntad: La batalla por mi atención</h1>
-  <p>Un viaje por mi historial de Youtube para descubrir cuánto tiempo me roba el algoritmo</p>
+  <main class="slide">
 
-  <button id="boton">Ver mi pregunta</button>
-  <p id="texto" hidden>¿Consumo lo que yo decido buscar o lo que la página de inicio me sirve en bandeja?</p>
+    <header class="meta">
+      <span>Elisava · Proyecto web</span>
+      <span class="autoplay"><i aria-hidden="true"></i>Autoplay</span>
+    </header>
+
+    <div class="content">
+      <p class="kicker">Algoritmo vs. Voluntad</p>
+
+      <h1>
+        <span>Alvaro</span>
+        <span class="outline">Puertolas</span>
+      </h1>
+
+      <p class="lead">La batalla por mi atención</p>
+
+      <p class="deck">Un viaje por mi historial de YouTube para descubrir cuánto tiempo me roba el algoritmo.</p>
+
+      <button id="boton">Ver mi pregunta</button>
+      <p id="texto" hidden>¿Consumo lo que yo decido buscar o lo que la página de inicio me sirve en bandeja?</p>
+    </div>
+
+    <footer class="player" aria-hidden="true">
+      <span>0:00</span>
+      <div class="bar"></div>
+      <span>∞</span>
+    </footer>
+
+  </main>
 
   <!-- El JavaScript va al final, cuando la página ya está cargada -->
   <script src="script.js"></script>

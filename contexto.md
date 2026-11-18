@@ -7,14 +7,15 @@ Página web de un proyecto académico de Elisava. Una sola página con HTML, CSS
 - **Rama:** `main`.
 
 ## Contenido actual
-- **Título:** "Algoritmo vs. Voluntad: La batalla por mi atención".
-- **Descripción:** "Un viaje por mi historial de Youtube para descubrir cuánto tiempo me roba el algoritmo".
+- **Portada (primer slide):** "Alvaro Puertolas" como título; "Algoritmo vs. Voluntad" como kicker y "La batalla por mi atención" como subtítulo.
+- **Descripción:** "Un viaje por mi historial de YouTube para descubrir cuánto tiempo me roba el algoritmo".
 - **Botón:** "Ver mi pregunta"; muestra u oculta la pregunta de investigación.
 - **Pregunta:** "¿Consumo lo que yo decido buscar o lo que la página de inicio me sirve en bandeja?".
+- **Decoración:** barra de reproductor ficticia (0:00 / ∞) y aviso de "Autoplay".
 
 ## Archivos
 - `index.html`: estructura y contenido de la página.
-- `style.css`: estilos. Sans-serif, margen de 40 px, título azul `#6276f7`, botón con padding y cursor pointer.
+- `style.css`: estilos. Diseño oscuro editorial: fondo `#0b0b0c`, Helvetica, acento naranja `#ff5a36`, portada a pantalla completa con el nombre en gran formato y animaciones CSS.
 - `script.js`: alterna el atributo `hidden` del párrafo al pulsar `#boton`.
 - `README.md`: solo el título del repositorio.
 - `personalidad.md`: cómo debe trabajar el asistente.
@@ -24,7 +25,7 @@ Página web de un proyecto académico de Elisava. Una sola página con HTML, CSS
 
 ## Estado
 - La página es funcional: el botón muestra y oculta la pregunta.
-- Contenido principal personalizado; pendiente revisar el diseño visual y cerrar los textos si el proyecto lo pide.
+- Diseño renovado como portada a pantalla completa (2026-11-18); pendiente la revisión visual en navegador.
 - No hay tests ni build.
 
 ## Restricciones

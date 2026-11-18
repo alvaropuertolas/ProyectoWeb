@@ -29,6 +29,12 @@ Reglas:
 
 ---
 
+## 2026-11-18 — Rediseño completo y primer slide
+- **Cambios:** `index.html` reestructurado como un slide a pantalla completa: "Alvaro Puertolas" como título, "Algoritmo vs. Voluntad" como kicker y "La batalla por mi atención" como subtítulo; se mantienen la descripción, el botón y la pregunta. Barra de reproductor decorativa (0:00 / ∞). `style.css` reescrito: fondo casi negro, Helvetica, acento naranja `#ff5a36`, segunda línea del nombre en contorno y animaciones de autoplay, barra y aparición de la pregunta.
+- **Motivo:** el profesor pide un primer slide con el nombre.
+- **Verificación:** sin verificación visual: la sesión no permite abrir el navegador. Revisar abriendo `index.html`.
+- **Pendientes:** valorar si el resto de slides se añaden después.
+
 ## 2026-11-10 — Memoria actualizada
 - **Cambios:** `memoria.md` reescrito en castellano y actualizado al estado actual; retoque de una línea en `contexto.md`.
 - **Motivo:** dejar los cuatro documentos (contexto, criterio, personalidad y memoria) coherentes para la revisión del profesor.

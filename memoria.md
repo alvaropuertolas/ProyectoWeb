@@ -11,12 +11,13 @@ Página web de una sola página, con HTML, CSS y JavaScript nativos. Sin framewo
 ## Decisiones
 - Mantener la estructura simple de la plantilla: HTML, CSS y JavaScript en archivos separados.
 - El botón "Ver mi pregunta" muestra u oculta la pregunta de investigación.
-- Diseño oscuro: fondo `#333333`, texto claro, tipografía Helvetica y título azul `#6276f7`.
+- Diseño renovado (2026-11-18): portada a pantalla completa con el nombre como título y metáfora de reproductor de vídeo; fondo `#0b0b0c`, acento naranja `#ff5a36`.
 
 ## Estado
 - La página es funcional y ya tiene el contenido propio del proyecto.
+- El diseño nuevo está pendiente de revisión visual en navegador.
 - Sin tests y sin build: se comprueba abriendo `index.html` en el navegador.
 
 ## Pendientes
-- Revisar el diseño visual.
-- Cerrar los textos definitivos si el proyecto lo pide.
+- Revisar el diseño en el navegador.
+- Decidir si se añaden más slides.
