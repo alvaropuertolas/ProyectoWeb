@@ -7,16 +7,18 @@ Página web de un proyecto académico de Elisava. Una sola página con HTML, CSS
 - **Rama:** `main`.
 
 ## Contenido actual
-- **Portada (primer slide):** "Alvaro Puertolas" como título; "Algoritmo vs. Voluntad" como kicker y "La batalla por mi atención" como subtítulo.
-- **Descripción:** "Un viaje por mi historial de YouTube para descubrir cuánto tiempo me roba el algoritmo".
-- **Botón:** "Ver mi pregunta"; muestra u oculta la pregunta de investigación.
-- **Pregunta:** "¿Consumo lo que yo decido buscar o lo que la página de inicio me sirve en bandeja?".
-- **Decoración:** barra de reproductor ficticia (0:00 / ∞) y aviso de "Autoplay".
+- **Home:** tres secciones apiladas con scroll vertical nativo y ajuste magnético por pantalla (portada, pregunta y cierre).
+- **Sección 1:** "alvaropuertolas" a gran escala y "Algoritmo vs Voluntad" como kicker naranja.
+- **Sección 2:** la pregunta "¿Consumo lo que yo decido buscar o lo que la página de inicio me sirve en bandeja?".
+- **Sección 3:** sin texto; las manchas forman un play.
+- **Entrada:** al cargar, las manchas forman el nombre, se disuelven y aparece el contenido; se puede saltar con cualquier gesto.
+- **Animación e interacción:** manchas grises irregulares en canvas, con rejilla, manchas grandes, contornos y cruces; forman un ojo con iris, pupila naranja y anillos. El ojo sigue el cursor y parpadea; las manchas cercanas orbitan el puntero; un clic sobre el ojo provoca un parpadeo con sonido. El fondo tiene parallax y grano de película. El cursor nativo se oculta con ratón y queda solo el anillo propio, que crece sobre el botón de sonido.
+- **Sonido:** pad grave y campanas generados con Web Audio; botón arriba a la derecha para activarlo o silenciarlo, apagado por defecto.
 
 ## Archivos
-- `index.html`: estructura y contenido de la página.
-- `style.css`: estilos. Diseño oscuro editorial: fondo `#0b0b0c`, Helvetica, acento naranja `#ff5a36`, portada a pantalla completa con el nombre en gran formato y animaciones CSS.
-- `script.js`: alterna el atributo `hidden` del párrafo al pulsar `#boton`.
+- `index.html`: canvas de fondo, cursor, botón de sonido y tres secciones apiladas.
+- `style.css`: estilos. Diseño oscuro: fondo `#141415`, Helvetica, acento naranja `#ff5a36`, tipografía a gran escala, grano, cursor tipo lente y control de sonido.
+- `script.js`: motor de canvas (entrada con el nombre, ojo con mirada y parpadeo, play, parallax y fondo) y audio generado con Web Audio.
 - `README.md`: solo el título del repositorio.
 - `personalidad.md`: cómo debe trabajar el asistente.
 - `criterio.md`: reglas de decisión.
@@ -24,8 +26,8 @@ Página web de un proyecto académico de Elisava. Una sola página con HTML, CSS
 - `memoria.md`: estado y decisiones del proyecto.
 
 ## Estado
-- La página es funcional: el botón muestra y oculta la pregunta.
-- Diseño renovado como portada a pantalla completa (2026-11-18); pendiente la revisión visual en navegador.
+- El home está montado (2026-11-22); pendiente la revisión visual en navegador.
+- Las páginas de datos están por hacer.
 - No hay tests ni build.
 
 ## Restricciones

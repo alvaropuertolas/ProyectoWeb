@@ -10,14 +10,19 @@ Página web de una sola página, con HTML, CSS y JavaScript nativos. Sin framewo
 
 ## Decisiones
 - Mantener la estructura simple de la plantilla: HTML, CSS y JavaScript en archivos separados.
-- El botón "Ver mi pregunta" muestra u oculta la pregunta de investigación.
-- Diseño renovado (2026-11-18): portada a pantalla completa con el nombre como título y metáfora de reproductor de vídeo; fondo `#0b0b0c`, acento naranja `#ff5a36`.
+- Home de tres pantallas apiladas (portada, pregunta y cierre con play) con scroll vertical nativo, al estilo onegrain.world.
+- Entrada con las manchas formando el nombre; se disuelven y el contenido aparece. Se puede saltar y respeta `prefers-reduced-motion`.
+- El ojo sigue el cursor y parpadea; al final se transforma en un play. Fondo con rejilla, capas de manchas, parallax, grano de película y cursor tipo lente.
+- Scroll con imán por pantalla; las manchas orbitan el puntero y un clic sobre el ojo lo hace parpadear con sonido.
+- Sonido generado con Web Audio (pad grave y campanas): solo se activa con el botón, apagado por defecto. Tras probar el autoplay se descartó porque los navegadores lo bloquean.
+- Sin cifras reales todavía; se descartaron los microtextos (barra superior, capítulos, pistas y progreso).
+- Paleta: fondo `#141415`, texto hueso y acento naranja `#ff5a36`.
 
 ## Estado
-- La página es funcional y ya tiene el contenido propio del proyecto.
-- El diseño nuevo está pendiente de revisión visual en navegador.
+- El home está montado y pendiente de revisión visual en navegador.
 - Sin tests y sin build: se comprueba abriendo `index.html` en el navegador.
 
 ## Pendientes
-- Revisar el diseño en el navegador.
-- Decidir si se añaden más slides.
+- Revisar el home en el navegador y ajustar velocidad, densidad y tamaño del ojo.
+- Revisar el resultado en un móvil real y el rendimiento.
+- Construir las páginas de datos con el export de YouTube.
