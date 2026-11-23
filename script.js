@@ -769,7 +769,7 @@
     const dg = e.gamma - gyroBase.gamma;
     const db = e.beta - gyroBase.beta;
     gyroYaw = Math.max(-1, Math.min(1, dg / 22)) * 0.6;
-    gyroPitch = Math.max(-1, Math.min(1, db / 22)) * 0.4;
+    gyroPitch = -Math.max(-1, Math.min(1, db / 22)) * 0.4;
   }
 
   function startGyro() {

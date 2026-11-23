@@ -32,8 +32,8 @@ Reglas:
 ## 2026-11-23 — Móvil a pantalla completa y giroscopio
 - **Cambios:** `viewport-fit=cover` y safe areas (`env(safe-area-inset-*)`) en paneles, sala, botón de sonido, raíl y pista inferior; la barra de la sala reserva espacio para el sonido y el estado se reduce en móvil. Eliminado el botón de giroscopio: el permiso se pide al pulsar el play (iOS exige un gesto) y, si se concede, la vista sigue la inclinación; el arrastre táctil sigue funcionando para avanzar y para mirar cuando el giro no está disponible. Icono de sonido cambiado a altavoz con ondas.
 - **Motivo:** la cabecera se pisaba con el sonido y el usuario quería el permiso sin botón.
-- **Verificación:** sin verificación visual (sesión sin permisos de navegador).
-- **Pendientes:** probar en iPhone real (Safari) y comprobar safe areas y permiso de movimiento.
+- **Verificación:** el usuario confirma que el giroscopio funciona; se invierte el eje vertical tras notarlo anti intuitivo. Probar de nuevo en iPhone.
+- **Pendientes:** confirmar la orientación vertical; si el horizontal también va al revés, invertir `gyroYaw`.
 
 ## 2026-11-23 — Más partículas y micro-movimiento
 - **Cambios:** aumentada la densidad de manchas en el home y de partículas en la sala (general y nubes por año). Las manchas del ojo y del play ya no quedan quietas: tienen una oscilación lenta propia; las partículas de la sala también. Segundo aumento de densidad: casi el doble en toda la web y algo más en la sala.
