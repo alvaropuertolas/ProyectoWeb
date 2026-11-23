@@ -791,8 +791,8 @@
     gyroAccX = Math.max(-32, Math.min(32, gyroAccX + dg * 0.75));
     gyroAccY = Math.max(-26, Math.min(26, gyroAccY + db * 0.75));
 
-    const targetYaw = (gyroAccX / 36) * 0.5;
-    const targetPitch = -(gyroAccY / 30) * 0.3;
+    const targetYaw = -(gyroAccX / 36) * 0.5;
+    const targetPitch = (gyroAccY / 30) * 0.3;
 
     // Suavizado extra para que no se sienta nervioso
     gyroYaw += (targetYaw - gyroYaw) * 0.12;
