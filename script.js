@@ -73,7 +73,9 @@
   let roomMode = false;
   let roomDrag = null;
   let gyroOn = false;
-  let gyroBase = null;
+  let gyroPrev = null;
+  let gyroAccX = 0;
+  let gyroAccY = 0;
   let gyroYaw = 0;
   let gyroPitch = 0;
 
@@ -764,17 +766,44 @@
 
   function onOrient(e) {
     if (e.gamma == null || e.beta == null) return;
-    if (!gyroBase) gyroBase = { gamma: e.gamma, beta: e.beta };
 
-    const dg = e.gamma - gyroBase.gamma;
-    const db = e.beta - gyroBase.beta;
-    gyroYaw = Math.max(-1, Math.min(1, dg / 22)) * 0.6;
-    gyroPitch = -Math.max(-1, Math.min(1, db / 22)) * 0.4;
+    // Cerca del límite del sensor, los ángulos saltan; se ignoran esos valores
+    if (Math.abs(e.gamma) > 85 || Math.abs(e.beta) > 170) return;
+
+    if (!gyroPrev) {
+      gyroPrev = { gamma: e.gamma, beta: e.beta };
+      return;
+    }
+
+    let dg = e.gamma - gyroPrev.gamma;
+    let db = e.beta - gyroPrev.beta;
+    if (dg > 180) dg -= 360;
+    if (dg < -180) dg += 360;
+    if (db > 180) db -= 360;
+    if (db < -180) db += 360;
+
+    // Ningún evento puede mover la vista de golpe
+    dg = Math.max(-10, Math.min(10, dg));
+    db = Math.max(-10, Math.min(10, db));
+    gyroPrev = { gamma: e.gamma, beta: e.beta };
+
+    // Acumulado y limitado: el gesto extremo no dispara la vista
+    gyroAccX = Math.max(-32, Math.min(32, gyroAccX + dg * 0.75));
+    gyroAccY = Math.max(-26, Math.min(26, gyroAccY + db * 0.75));
+
+    const targetYaw = (gyroAccX / 36) * 0.5;
+    const targetPitch = -(gyroAccY / 30) * 0.3;
+
+    // Suavizado extra para que no se sienta nervioso
+    gyroYaw += (targetYaw - gyroYaw) * 0.12;
+    gyroPitch += (targetPitch - gyroPitch) * 0.12;
   }
 
   function startGyro() {
     if (gyroOn) return;
-    gyroBase = null;
+    gyroPrev = null;
+    gyroAccX = 0;
+    gyroAccY = 0;
     gyroYaw = 0;
     gyroPitch = 0;
     window.addEventListener('deviceorientation', onOrient);
@@ -816,15 +845,19 @@
       });
     }
 
-    if (gyroOn && gyroBase) {
+    const gyroLook = gyroOn && gyroPrev;
+
+    if (gyroLook) {
       room.tyaw = gyroYaw;
       room.tpitch = gyroPitch;
     } else {
       room.tyaw = (pointer.tx / vw - 0.5) * 0.6;
       room.tpitch = (pointer.ty / vh - 0.5) * 0.4;
     }
-    room.yaw += (room.tyaw - room.yaw) * 0.08;
-    room.pitch += (room.tpitch - room.pitch) * 0.08;
+
+    const lookEase = gyroLook ? 0.05 : 0.08;
+    room.yaw += (room.tyaw - room.yaw) * lookEase;
+    room.pitch += (room.tpitch - room.pitch) * lookEase;
     room.z += (room.tz - room.z) * 0.09;
 
     const focal = Math.min(vw, vh) * 0.95;
