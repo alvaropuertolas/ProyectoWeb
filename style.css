@@ -223,6 +223,45 @@ body.room-mode main {
   letter-spacing: 0.16em;
 }
 
+/* Raíl de años de la sala */
+.room__years {
+  position: absolute;
+  right: clamp(14px, 3vw, 34px);
+  top: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 9px;
+  transform: translateY(-50%);
+  pointer-events: auto;
+}
+
+.room__year {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: rgba(242, 239, 233, 0.35);
+  font: inherit;
+  font-size: 0.68rem;
+  letter-spacing: 0.1em;
+  cursor: pointer;
+  transition: color 0.3s ease;
+}
+
+.room__year:hover,
+.room__year:focus-visible {
+  color: var(--ink);
+}
+
+.room__year.is-current {
+  color: var(--accent);
+}
+
+.room__year:focus-visible {
+  outline: 1px solid var(--accent);
+  outline-offset: 3px;
+}
+
 .room__hint {
   position: absolute;
   left: 50%;

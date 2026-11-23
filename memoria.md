@@ -11,7 +11,7 @@ Página web de una sola página, con HTML, CSS y JavaScript nativos. Sin framewo
 ## Decisiones
 - Mantener la estructura simple de la plantilla: HTML, CSS y JavaScript en archivos separados.
 - Home de tres pantallas apiladas (portada, pregunta y play) con scroll vertical nativo y ajuste magnético, al estilo onegrain.world.
-- Tras el play se entra en una sala 3D a pantalla completa, con cámara navegable (ratón y rueda/arrastre) y etiquetas de datos en construcción.
+- Tras el play se entra en una sala 3D a pantalla completa con capítulos por año (2019–2025), raíl lateral clicable y cámara navegable (ratón y rueda/arrastre) que se imanta a cada capítulo al parar. Datos placeholder en construcción.
 - Entrada con las manchas formando el nombre; se disuelven y el contenido aparece. Se puede saltar y respeta `prefers-reduced-motion`.
 - El ojo sigue el cursor y parpadea; al final se transforma en un play. Fondo con rejilla, capas de manchas, parallax, grano de película y cursor tipo lente.
 - Scroll con imán por pantalla; las manchas orbitan el puntero y un clic sobre el ojo lo hace parpadear con sonido.

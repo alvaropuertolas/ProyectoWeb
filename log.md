@@ -29,6 +29,12 @@ Reglas:
 
 ---
 
+## 2026-11-23 — Sala de datos por años
+- **Cambios:** la sala 3D se organiza en capítulos 2019–2025. Cada año muestra una etiqueta grande y tres datos placeholder (horas, vídeos, canales). Raíl lateral de años clicable, año actual en naranja; al dejar de hacer scroll, la cámara se imanta al capítulo más cercano. La rueda y el arrastre recorren el túnel.
+- **Motivo:** tomar la estructura narrativa del referente cómic (años/capítulos), no su estética.
+- **Verificación:** sin verificación visual (sesión sin permisos de navegador).
+- **Pendientes:** sustituir los placeholders por los datos reales del export.
+
 ## 2026-11-23 — Sala de datos en 3D
 - **Cambios:** la pantalla de datos desaparece del scroll; al pulsar el play (tras el warp) se entra en una sala 3D a pantalla completa: túnel de manchas con profundidad, niebla y etiquetas flotantes (horas, canales, categorías…). El ratón gira la cámara, la rueda avanza/retrocede y en móvil se arrastra. Botón "volver" y `Esc` para salir; dentro, el scroll de la web queda bloqueado.
 - **Motivo:** petición del usuario: sentir que se mueve literalmente por los datos.

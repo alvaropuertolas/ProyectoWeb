@@ -7,6 +7,7 @@
   const playCta = document.querySelector('.play-cta');
   const roomEl = document.querySelector('#room');
   const roomBack = document.querySelector('.room__back');
+  const yearsEl = document.querySelector('#roomYears');
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   const TAU = Math.PI * 2;
@@ -52,7 +53,23 @@
   let warpT = 0;
 
   const ROOM_DEPTH = 2400;
-  const room = { pts: [], nodes: [], z: 0, tz: 0, yaw: 0, tyaw: 0, pitch: 0, tpitch: 0, built: false };
+  const YEARS = [2019, 2020, 2021, 2022, 2023, 2024, 2025];
+  const CHAPTER_GAP = 900;
+  const ROOM_MAX_Z = CHAPTER_GAP * (YEARS.length - 1);
+  const room = {
+    pts: [],
+    chapters: [],
+    z: 0,
+    tz: 0,
+    yaw: 0,
+    tyaw: 0,
+    pitch: 0,
+    tpitch: 0,
+    lastInput: 0,
+    snapPending: false,
+    railIndex: -1,
+    built: false
+  };
   let roomMode = false;
   let roomDrag = null;
 
@@ -636,30 +653,38 @@
       };
     });
 
-    const labels = [
-      'horas',
-      'canales',
-      'categorías',
-      'búsquedas',
-      'atención',
-      'autoplay',
-      'recomendado',
-      'suscripciones',
-      'voluntad',
-      'algoritmo'
-    ];
+    room.chapters = YEARS.map((year, i) => ({
+      year,
+      z: 600 + i * CHAPTER_GAP,
+      labels: [
+        { name: 'horas', dx: -250, dy: 170 },
+        { name: 'vídeos', dx: 20, dy: 210 },
+        { name: 'canales', dx: 270, dy: 180 }
+      ]
+    }));
 
-    room.nodes = labels.map((text, i) => {
-      const a = rnd(0, TAU);
-      const r = rnd(120, 520);
-      return {
-        text,
-        x: Math.cos(a) * r,
-        y: Math.sin(a) * r * 0.6,
-        z: 350 + (i * (ROOM_DEPTH - 500)) / labels.length + rnd(-80, 80),
-        orange: i % 3 === 0
-      };
-    });
+    if (yearsEl) {
+      yearsEl.innerHTML = '';
+      room.chapters.forEach((c, i) => {
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'room__year';
+        b.textContent = c.year;
+        b.addEventListener('click', () => {
+          room.tz = i * CHAPTER_GAP;
+          room.snapPending = false;
+          room.lastInput = performance.now();
+        });
+        b.addEventListener('pointerenter', () => {
+          if (cursorEl) cursorEl.classList.add('is-link');
+        });
+        b.addEventListener('pointerleave', () => {
+          if (cursorEl) cursorEl.classList.remove('is-link');
+        });
+        yearsEl.appendChild(b);
+      });
+      room.railIndex = -1;
+    }
 
     room.built = true;
   }
@@ -676,6 +701,9 @@
     room.tyaw = 0;
     room.pitch = 0;
     room.tpitch = 0;
+    room.lastInput = 0;
+    room.snapPending = false;
+    room.railIndex = -1;
     roomDrag = null;
 
     document.body.classList.add('room-mode');
@@ -703,6 +731,25 @@
   }
 
   function renderRoom() {
+    if (room.snapPending && performance.now() - room.lastInput > 450) {
+      room.tz = Math.max(0, Math.min(ROOM_MAX_Z, Math.round(room.tz / CHAPTER_GAP) * CHAPTER_GAP));
+      room.snapPending = false;
+    }
+
+    const chapterIndex = Math.max(
+      0,
+      Math.min(room.chapters.length - 1, Math.round(room.z / CHAPTER_GAP))
+    );
+
+    if (yearsEl && chapterIndex !== room.railIndex) {
+      room.railIndex = chapterIndex;
+      Array.from(yearsEl.children).forEach((b, i) => {
+        b.classList.toggle('is-current', i === chapterIndex);
+        if (i === chapterIndex) b.setAttribute('aria-current', 'true');
+        else b.removeAttribute('aria-current');
+      });
+    }
+
     room.tyaw = (pointer.tx / vw - 0.5) * 0.6;
     room.tpitch = (pointer.ty / vh - 0.5) * 0.4;
     room.yaw += (room.tyaw - room.yaw) * 0.08;
@@ -755,44 +802,48 @@
 
     ctx.globalAlpha = 1;
     ctx.textBaseline = 'middle';
-    ctx.textAlign = 'left';
 
-    for (const n of room.nodes) {
-      let z = n.z - room.z;
-      if (z < 40) {
-        const laps = Math.ceil((40 - z) / ROOM_DEPTH);
-        n.z += laps * ROOM_DEPTH;
-        z += laps * ROOM_DEPTH;
-      }
-      if (z > ROOM_DEPTH) continue;
+    for (let i = room.chapters.length - 1; i >= 0; i--) {
+      const c = room.chapters[i];
+      const z = c.z - room.z;
+      if (z < 60 || z > ROOM_DEPTH) continue;
 
-      const x1 = n.x * cyaw - z * syaw;
-      const z1 = n.x * syaw + z * cyaw;
-      const y1 = n.y * cp - z1 * sp;
-      const z2 = n.y * sp + z1 * cp;
-      if (z2 < 60 || z2 > ROOM_DEPTH) continue;
+      const x1 = -z * syaw;
+      const z1 = z * cyaw;
+      const y1 = -z1 * sp;
+      const z2 = z1 * cp;
+      if (z2 < 60) continue;
 
       const s = focal / z2;
       const sx = cx + x1 * s;
       const sy = cy + y1 * s;
-      if (sx < -260 || sx > vw + 260 || sy < -120 || sy > vh + 120) continue;
+      if (sx < -vw * 0.5 || sx > vw * 1.5 || sy < -vh * 0.5 || sy > vh * 1.5) continue;
 
       const fog = clamp01(1 - z2 / ROOM_DEPTH);
-      const fs = Math.max(10, Math.min(44, 18 * s));
+      const current = i === chapterIndex;
+      const fs = Math.max(18, Math.min(120, 46 * s));
 
-      ctx.globalAlpha = fog * 0.8;
-      ctx.fillStyle = n.orange ? '#ff5a36' : '#f2efe9';
+      ctx.globalAlpha = Math.max(0.12, fog);
+      ctx.textAlign = 'center';
+      ctx.fillStyle = current ? '#ff5a36' : 'rgba(242, 239, 233, 0.75)';
       ctx.font = `400 ${fs}px Helvetica, "Helvetica Neue", Arial, sans-serif`;
-      ctx.fillText(n.text, sx + 10, sy);
+      ctx.fillText(String(c.year), sx, sy);
 
-      ctx.strokeStyle = n.orange ? 'rgba(255, 90, 54, 0.6)' : 'rgba(242, 239, 233, 0.4)';
-      ctx.lineWidth = 1;
-      ctx.beginPath();
-      ctx.moveTo(sx - 4, sy);
-      ctx.lineTo(sx + 4, sy);
-      ctx.moveTo(sx, sy - 4);
-      ctx.lineTo(sx, sy + 4);
-      ctx.stroke();
+      const dfs = Math.max(10, Math.min(30, 14 * s));
+      ctx.textAlign = 'left';
+      ctx.font = `400 ${dfs}px Helvetica, "Helvetica Neue", Arial, sans-serif`;
+      ctx.fillStyle = 'rgba(242, 239, 233, 0.55)';
+
+      for (const d of c.labels) {
+        const lx1 = d.dx * cyaw - z * syaw;
+        const lz1 = d.dx * syaw + z * cyaw;
+        const ly1 = d.dy * cp - lz1 * sp;
+        const lz2 = d.dy * sp + lz1 * cp;
+        if (lz2 < 60) continue;
+
+        const ls = focal / lz2;
+        ctx.fillText(d.name + ' —', cx + lx1 * ls + 8, cy + ly1 * ls);
+      }
     }
 
     ctx.globalAlpha = 1;
@@ -1162,7 +1213,9 @@
     (e) => {
       if (!roomMode) return;
       e.preventDefault();
-      room.tz = Math.min(30000, Math.max(0, room.tz + e.deltaY * 0.9));
+      room.tz = Math.min(ROOM_MAX_Z, Math.max(0, room.tz + e.deltaY * 1.2));
+      room.lastInput = performance.now();
+      room.snapPending = true;
     },
     { passive: false }
   );
@@ -1175,7 +1228,9 @@
   window.addEventListener('pointermove', (e) => {
     if (!roomMode || !roomDrag) return;
     const dy = roomDrag.y - e.clientY;
-    room.tz = Math.min(30000, Math.max(0, room.tz + dy * 2.2));
+    room.tz = Math.min(ROOM_MAX_Z, Math.max(0, room.tz + dy * 2.2));
+    room.lastInput = performance.now();
+    room.snapPending = true;
     roomDrag.x = e.clientX;
     roomDrag.y = e.clientY;
   });
