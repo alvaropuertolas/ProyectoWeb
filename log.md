@@ -29,8 +29,20 @@ Reglas:
 
 ---
 
+## 2026-11-23 — Más partículas y micro-movimiento
+- **Cambios:** aumentada la densidad de manchas en el home y de partículas en la sala (general y nubes por año). Las manchas del ojo y del play ya no quedan quietas: tienen una oscilación lenta propia; las partículas de la sala también. Segundo aumento de densidad: casi el doble en toda la web y algo más en la sala.
+- **Motivo:** petición del usuario: más partículas y el mismo micro-movimiento de la portada en todas las escenas.
+- **Verificación:** sin verificación visual (sesión sin permisos de navegador).
+- **Pendientes:** comprobar densidad y rendimiento en móvil.
+
+## 2026-11-23 — Partículas al volver atrás
+- **Cambios:** el polvo de la sala se recicla en ambos sentidos; al retroceder hacia años anteriores vuelve a rodear la cámara en lugar de quedarse fuera del plano lejano.
+- **Motivo:** al volver desde 2025 las partículas desaparecían.
+- **Verificación:** sin verificación visual (sesión sin permisos de navegador).
+- **Pendientes:** comprobar el recorrido completo de ida y vuelta.
+
 ## 2026-11-23 — Sala de datos por años
-- **Cambios:** la sala 3D se organiza en capítulos 2019–2025. Cada año muestra una etiqueta grande y tres datos placeholder (horas, vídeos, canales). Raíl lateral de años clicable, año actual en naranja; al dejar de hacer scroll, la cámara se imanta al capítulo más cercano. La rueda y el arrastre recorren el túnel.
+- **Cambios:** la sala 3D se organiza en capítulos 2019–2025. Cada año muestra una etiqueta grande y tres datos placeholder (horas, vídeos, canales). Raíl lateral de años clicable, año actual en naranja; al dejar de hacer scroll, la cámara se imanta al capítulo más cercano. La rueda y el arrastre recorren el túnel. Ajuste: los años van en contorno, se desvanecen al acercarse y quedan dentro de un aro de paso; cada año tiene su propia nube de partículas.
 - **Motivo:** tomar la estructura narrativa del referente cómic (años/capítulos), no su estética.
 - **Verificación:** sin verificación visual (sesión sin permisos de navegador).
 - **Pendientes:** sustituir los placeholders por los datos reales del export.

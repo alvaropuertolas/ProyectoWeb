@@ -367,7 +367,7 @@
     document.documentElement.style.setProperty('--play-w', pw + 'px');
     document.documentElement.style.setProperty('--play-h', ph + 'px');
 
-    const count = Math.max(vw < 700 ? 90 : 120, Math.min(260, Math.round((vw * vh) / 7000)));
+    const count = Math.max(vw < 700 ? 180 : 260, Math.min(480, Math.round((vw * vh) / 3600)));
     blobs = Array.from({ length: count }, makeBlob);
     haze = Array.from({ length: vw < 640 ? 5 : 7 }, makeHaze);
     marks = Array.from({ length: vw < 640 ? 8 : 14 }, makeMark);
@@ -561,12 +561,9 @@
     const nameLocal = smooth((intro.mix - nd) / (1 - nd));
 
     const wob = reduceMotion ? 0 : 1;
-    const amp = (2 + 3 * (1 - eyeLocal)) * (1 - nameLocal) * wob;
-    const wx = Math.sin(now * 0.0008 * b.ws + b.wp) * amp;
-    const wy = Math.cos(now * 0.0006 * b.ws + b.wp) * amp;
 
-    let x = b.x + wx;
-    let y = b.y + wy;
+    let x = b.x;
+    let y = b.y;
 
     const arc = Math.sin(eyeLocal * Math.PI) * b.arc * 18;
     const eyeTX = b.target.x + (b.pupil ? gaze.x : 0);
@@ -582,6 +579,11 @@
       x += (b.name.x - x) * nameLocal;
       y += (b.name.y - y) * nameLocal;
     }
+
+    // Micro-movimiento también con el ojo y el play ya formados
+    const amp = (3 + 2 * (1 - eyeLocal)) * wob;
+    x += Math.sin(now * 0.0011 * b.ws + b.wp) * amp;
+    y += Math.cos(now * 0.0009 * b.ws + b.wp * 1.3) * amp;
 
     if (!reduceMotion) {
       const dx = x - pointer.x;
@@ -636,7 +638,7 @@
   }
 
   function buildRoom() {
-    const count = vw < 700 ? 110 : 180;
+    const count = vw < 700 ? 190 : 360;
 
     room.pts = Array.from({ length: count }, () => {
       const a = rnd(0, TAU);
@@ -649,6 +651,9 @@
         shape: makeShape(5 + Math.floor(rnd(0, 4))),
         rot: rnd(0, TAU),
         vr: rnd(-0.0015, 0.0015),
+        phase: rnd(0, TAU),
+        ws: rnd(0.3, 0.9),
+        wob: rnd(3, 12),
         color: Math.random() < 0.08 ? ACCENT : GRAYS[Math.floor(rnd(0, GRAYS.length))]
       };
     });
@@ -662,6 +667,29 @@
         { name: 'canales', dx: 270, dy: 180 }
       ]
     }));
+
+    // Nube propia alrededor de cada año
+    const cluster = vw < 700 ? 14 : 26;
+
+    for (const c of room.chapters) {
+      for (let k = 0; k < cluster; k++) {
+        const a = rnd(0, TAU);
+        const r = rnd(120, 420);
+        room.pts.push({
+          x: Math.cos(a) * r,
+          y: Math.sin(a) * r * 0.7,
+          z: c.z + rnd(-180, 180),
+          size: rnd(2, 8),
+          shape: makeShape(5 + Math.floor(rnd(0, 4))),
+          rot: rnd(0, TAU),
+          vr: rnd(-0.0015, 0.0015),
+          phase: rnd(0, TAU),
+          ws: rnd(0.3, 0.9),
+          wob: rnd(2, 8),
+          color: Math.random() < 0.2 ? ACCENT : GRAYS[Math.floor(rnd(0, GRAYS.length))]
+        });
+      }
+    }
 
     if (yearsEl) {
       yearsEl.innerHTML = '';
@@ -730,7 +758,7 @@
     lastScroll = window.scrollY;
   }
 
-  function renderRoom() {
+  function renderRoom(now) {
     if (room.snapPending && performance.now() - room.lastInput > 450) {
       room.tz = Math.max(0, Math.min(ROOM_MAX_Z, Math.round(room.tz / CHAPTER_GAP) * CHAPTER_GAP));
       room.snapPending = false;
@@ -777,17 +805,22 @@
 
     for (const p of room.pts) {
       let z = p.z - room.z;
-      if (z < 40) {
-        const laps = Math.ceil((40 - z) / ROOM_DEPTH);
-        p.z += laps * ROOM_DEPTH;
-        z += laps * ROOM_DEPTH;
-      }
-      if (z > ROOM_DEPTH) continue;
 
-      const x1 = p.x * cyaw - z * syaw;
-      const z1 = p.x * syaw + z * cyaw;
-      const y1 = p.y * cp - z1 * sp;
-      const z2 = p.y * sp + z1 * cp;
+      // Reciclado en ambos sentidos: el polvo siempre rodea la cámara,
+      // también al retroceder hacia años anteriores.
+      if (z < 40 || z > ROOM_DEPTH) {
+        const span = ROOM_DEPTH - 40;
+        const wrapped = 40 + (((z - 40) % span) + span) % span;
+        p.z += wrapped - z;
+        z = wrapped;
+      }
+
+      const px = p.x + Math.sin(now * 0.0011 * p.ws + p.phase) * p.wob;
+      const py = p.y + Math.cos(now * 0.0009 * p.ws + p.phase * 1.3) * p.wob;
+      const x1 = px * cyaw - z * syaw;
+      const z1 = px * syaw + z * cyaw;
+      const y1 = py * cp - z1 * sp;
+      const z2 = py * sp + z1 * cp;
       if (z2 < 40 || z2 > ROOM_DEPTH) continue;
 
       const s = focal / z2;
@@ -820,16 +853,28 @@
       if (sx < -vw * 0.5 || sx > vw * 1.5 || sy < -vh * 0.5 || sy > vh * 1.5) continue;
 
       const fog = clamp01(1 - z2 / ROOM_DEPTH);
+      const near = clamp01((z2 - 160) / 480);
       const current = i === chapterIndex;
       const fs = Math.max(18, Math.min(120, 46 * s));
 
-      ctx.globalAlpha = Math.max(0.12, fog);
+      // Aro de paso: se agranda y lo atraviesas
+      ctx.globalAlpha = Math.max(0.06, fog) * (0.35 + 0.65 * near);
+      ctx.strokeStyle = current ? 'rgba(255, 90, 54, 0.5)' : 'rgba(242, 239, 233, 0.16)';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.arc(sx, sy, 240 * s, 0, TAU);
+      ctx.stroke();
+
+      // Año en contorno: no tapa el fondo ni se vuelve un muro blanco
+      ctx.globalAlpha = Math.max(0.06, fog) * near;
       ctx.textAlign = 'center';
-      ctx.fillStyle = current ? '#ff5a36' : 'rgba(242, 239, 233, 0.75)';
+      ctx.strokeStyle = current ? 'rgba(255, 90, 54, 0.95)' : 'rgba(242, 239, 233, 0.6)';
+      ctx.lineWidth = Math.max(0.8, Math.min(2, 0.5 * s));
       ctx.font = `400 ${fs}px Helvetica, "Helvetica Neue", Arial, sans-serif`;
-      ctx.fillText(String(c.year), sx, sy);
+      ctx.strokeText(String(c.year), sx, sy);
 
       const dfs = Math.max(10, Math.min(30, 14 * s));
+      ctx.globalAlpha = Math.max(0.05, fog) * near;
       ctx.textAlign = 'left';
       ctx.font = `400 ${dfs}px Helvetica, "Helvetica Neue", Arial, sans-serif`;
       ctx.fillStyle = 'rgba(242, 239, 233, 0.55)';
@@ -855,7 +900,7 @@
 
     if (roomMode) {
       if (!room.built) buildRoom();
-      renderRoom();
+      renderRoom(now);
       if (cursorEl && pointer.seen) {
         cursorEl.style.transform = `translate3d(${pointer.tx}px, ${pointer.ty}px, 0)`;
       }
