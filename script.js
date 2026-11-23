@@ -72,6 +72,7 @@
   };
   let roomMode = false;
   let roomDrag = null;
+  let touchLookUntil = 0;
   let gyroOn = false;
   let gyroPrev = null;
   let gyroAccX = 0;
@@ -739,6 +740,7 @@
     room.snapPending = false;
     room.railIndex = -1;
     roomDrag = null;
+    touchLookUntil = 0;
 
     document.body.classList.add('room-mode');
     roomEl.hidden = false;
@@ -845,7 +847,7 @@
       });
     }
 
-    const gyroLook = gyroOn && gyroPrev;
+    const gyroLook = gyroOn && gyroPrev && now >= touchLookUntil;
 
     if (gyroLook) {
       room.tyaw = gyroYaw;
@@ -1348,6 +1350,7 @@
   window.addEventListener('pointerdown', (e) => {
     if (!roomMode) return;
     roomDrag = { x: e.clientX, y: e.clientY };
+    if (e.pointerType !== 'mouse') touchLookUntil = performance.now() + 1500;
   });
 
   window.addEventListener('pointermove', (e) => {
@@ -1356,6 +1359,7 @@
     room.tz = Math.min(ROOM_MAX_Z, Math.max(0, room.tz + dy * 2.2));
     room.lastInput = performance.now();
     room.snapPending = true;
+    if (e.pointerType !== 'mouse') touchLookUntil = performance.now() + 1500;
     roomDrag.x = e.clientX;
     roomDrag.y = e.clientY;
   });
