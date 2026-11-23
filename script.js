@@ -4,6 +4,9 @@
   const h1 = document.querySelector('h1');
   const cursorEl = document.querySelector('.cursor');
   const soundBtn = document.querySelector('.sound');
+  const playCta = document.querySelector('.play-cta');
+  const roomEl = document.querySelector('#room');
+  const roomBack = document.querySelector('.room__back');
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   const TAU = Math.PI * 2;
@@ -43,6 +46,15 @@
   let playChimed = false;
   let eyeMixState = 0;
   let playMixState = 0;
+  let portalBusy = false;
+  let warpActive = false;
+  let warpStart = 0;
+  let warpT = 0;
+
+  const ROOM_DEPTH = 2400;
+  const room = { pts: [], nodes: [], z: 0, tz: 0, yaw: 0, tyaw: 0, pitch: 0, tpitch: 0, built: false };
+  let roomMode = false;
+  let roomDrag = null;
 
   const pointer = { x: 0, y: 0, tx: 0, ty: 0, seen: false };
   const gaze = { x: 0, y: 0 };
@@ -215,6 +227,7 @@
       wp: rnd(0, TAU),
       ws: rnd(0.3, 0.9),
       arc: rnd(-1, 1),
+      wang: rnd(0, TAU),
       pupil: false,
       target: { x: 0, y: 0 },
       play: { x: 0, y: 0 },
@@ -334,6 +347,9 @@
       pad: ph * 0.16
     };
 
+    document.documentElement.style.setProperty('--play-w', pw + 'px');
+    document.documentElement.style.setProperty('--play-h', ph + 'px');
+
     const count = Math.max(vw < 700 ? 90 : 120, Math.min(260, Math.round((vw * vh) / 7000)));
     blobs = Array.from({ length: count }, makeBlob);
     haze = Array.from({ length: vw < 640 ? 5 : 7 }, makeHaze);
@@ -349,6 +365,8 @@
       intro.active = false;
       document.body.classList.remove('is-intro');
     }
+
+    room.built = false;
   }
 
   function paintShape(shape, size, x, y, rot, color, stroke) {
@@ -564,7 +582,21 @@
       }
     }
 
-    paintShape(b.shape, b.size * (1 - nameLocal * 0.35), x, y, b.rot, b.color, b.outline);
+    let size = b.size * (1 - nameLocal * 0.35);
+
+    if (warpT > 0.001) {
+      const wdx = x - vw / 2;
+      const wdy = y - vh / 2;
+      const wd = Math.hypot(wdx, wdy);
+      const ux = wd < 1 ? Math.cos(b.wang) : wdx / wd;
+      const uy = wd < 1 ? Math.sin(b.wang) : wdy / wd;
+      const push = warpT * Math.min(vw, vh) * 1.15;
+      x += ux * push;
+      y += uy * push;
+      size *= 1 + warpT * 2.4;
+    }
+
+    paintShape(b.shape, size, x, y, b.rot, b.color, b.outline);
   }
 
   function updateIntro(now) {
@@ -586,11 +618,214 @@
     }
   }
 
+  function buildRoom() {
+    const count = vw < 700 ? 110 : 180;
+
+    room.pts = Array.from({ length: count }, () => {
+      const a = rnd(0, TAU);
+      const r = rnd(80, 720);
+      return {
+        x: Math.cos(a) * r,
+        y: Math.sin(a) * r * 0.65,
+        z: rnd(0, ROOM_DEPTH),
+        size: rnd(3, 14),
+        shape: makeShape(5 + Math.floor(rnd(0, 4))),
+        rot: rnd(0, TAU),
+        vr: rnd(-0.0015, 0.0015),
+        color: Math.random() < 0.08 ? ACCENT : GRAYS[Math.floor(rnd(0, GRAYS.length))]
+      };
+    });
+
+    const labels = [
+      'horas',
+      'canales',
+      'categorías',
+      'búsquedas',
+      'atención',
+      'autoplay',
+      'recomendado',
+      'suscripciones',
+      'voluntad',
+      'algoritmo'
+    ];
+
+    room.nodes = labels.map((text, i) => {
+      const a = rnd(0, TAU);
+      const r = rnd(120, 520);
+      return {
+        text,
+        x: Math.cos(a) * r,
+        y: Math.sin(a) * r * 0.6,
+        z: 350 + (i * (ROOM_DEPTH - 500)) / labels.length + rnd(-80, 80),
+        orange: i % 3 === 0
+      };
+    });
+
+    room.built = true;
+  }
+
+  function enterRoom() {
+    if (roomMode || !roomEl) return;
+
+    roomMode = true;
+    if (!room.built) buildRoom();
+
+    room.z = 0;
+    room.tz = 0;
+    room.yaw = 0;
+    room.tyaw = 0;
+    room.pitch = 0;
+    room.tpitch = 0;
+    roomDrag = null;
+
+    document.body.classList.add('room-mode');
+    roomEl.hidden = false;
+    requestAnimationFrame(() => roomEl.classList.add('is-visible'));
+  }
+
+  function exitRoom() {
+    if (!roomMode) return;
+
+    roomMode = false;
+    roomDrag = null;
+    if (cursorEl) cursorEl.classList.remove('is-link');
+    document.body.classList.remove('room-mode');
+
+    if (roomEl) {
+      roomEl.classList.remove('is-visible');
+      setTimeout(() => {
+        if (!roomMode) roomEl.hidden = true;
+      }, 500);
+    }
+
+    smoothP = 1;
+    lastScroll = window.scrollY;
+  }
+
+  function renderRoom() {
+    room.tyaw = (pointer.tx / vw - 0.5) * 0.6;
+    room.tpitch = (pointer.ty / vh - 0.5) * 0.4;
+    room.yaw += (room.tyaw - room.yaw) * 0.08;
+    room.pitch += (room.tpitch - room.pitch) * 0.08;
+    room.z += (room.tz - room.z) * 0.09;
+
+    const focal = Math.min(vw, vh) * 0.95;
+    const cx = vw / 2;
+    const cy = vh / 2;
+    const cyaw = Math.cos(room.yaw);
+    const syaw = Math.sin(room.yaw);
+    const cp = Math.cos(room.pitch);
+    const sp = Math.sin(room.pitch);
+
+    ctx.clearRect(0, 0, vw, vh);
+    ctx.fillStyle = '#141415';
+    ctx.fillRect(0, 0, vw, vh);
+    drawGrid();
+
+    const glow = ctx.createRadialGradient(cx, cy, 0, cx, cy, Math.max(vw, vh) * 0.55);
+    glow.addColorStop(0, 'rgba(255, 90, 54, 0.05)');
+    glow.addColorStop(1, 'rgba(255, 90, 54, 0)');
+    ctx.fillStyle = glow;
+    ctx.fillRect(0, 0, vw, vh);
+
+    for (const p of room.pts) {
+      let z = p.z - room.z;
+      if (z < 40) {
+        const laps = Math.ceil((40 - z) / ROOM_DEPTH);
+        p.z += laps * ROOM_DEPTH;
+        z += laps * ROOM_DEPTH;
+      }
+      if (z > ROOM_DEPTH) continue;
+
+      const x1 = p.x * cyaw - z * syaw;
+      const z1 = p.x * syaw + z * cyaw;
+      const y1 = p.y * cp - z1 * sp;
+      const z2 = p.y * sp + z1 * cp;
+      if (z2 < 40 || z2 > ROOM_DEPTH) continue;
+
+      const s = focal / z2;
+      const sx = cx + x1 * s;
+      const sy = cy + y1 * s;
+      if (sx < -220 || sx > vw + 220 || sy < -220 || sy > vh + 220) continue;
+
+      p.rot += p.vr;
+      ctx.globalAlpha = clamp01(1 - z2 / ROOM_DEPTH);
+      paintShape(p.shape, p.size * s, sx, sy, p.rot, p.color, false);
+    }
+
+    ctx.globalAlpha = 1;
+    ctx.textBaseline = 'middle';
+    ctx.textAlign = 'left';
+
+    for (const n of room.nodes) {
+      let z = n.z - room.z;
+      if (z < 40) {
+        const laps = Math.ceil((40 - z) / ROOM_DEPTH);
+        n.z += laps * ROOM_DEPTH;
+        z += laps * ROOM_DEPTH;
+      }
+      if (z > ROOM_DEPTH) continue;
+
+      const x1 = n.x * cyaw - z * syaw;
+      const z1 = n.x * syaw + z * cyaw;
+      const y1 = n.y * cp - z1 * sp;
+      const z2 = n.y * sp + z1 * cp;
+      if (z2 < 60 || z2 > ROOM_DEPTH) continue;
+
+      const s = focal / z2;
+      const sx = cx + x1 * s;
+      const sy = cy + y1 * s;
+      if (sx < -260 || sx > vw + 260 || sy < -120 || sy > vh + 120) continue;
+
+      const fog = clamp01(1 - z2 / ROOM_DEPTH);
+      const fs = Math.max(10, Math.min(44, 18 * s));
+
+      ctx.globalAlpha = fog * 0.8;
+      ctx.fillStyle = n.orange ? '#ff5a36' : '#f2efe9';
+      ctx.font = `400 ${fs}px Helvetica, "Helvetica Neue", Arial, sans-serif`;
+      ctx.fillText(n.text, sx + 10, sy);
+
+      ctx.strokeStyle = n.orange ? 'rgba(255, 90, 54, 0.6)' : 'rgba(242, 239, 233, 0.4)';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(sx - 4, sy);
+      ctx.lineTo(sx + 4, sy);
+      ctx.moveTo(sx, sy - 4);
+      ctx.lineTo(sx, sy + 4);
+      ctx.stroke();
+    }
+
+    ctx.globalAlpha = 1;
+  }
+
   function frame(now) {
     const dt = Math.min(48, now - last || 16);
     last = now;
 
+    if (roomMode) {
+      if (!room.built) buildRoom();
+      renderRoom();
+      if (cursorEl && pointer.seen) {
+        cursorEl.style.transform = `translate3d(${pointer.tx}px, ${pointer.ty}px, 0)`;
+      }
+      requestAnimationFrame(frame);
+      return;
+    }
+
     updateIntro(now);
+
+    if (warpActive) {
+      const wt = now - warpStart;
+      if (wt < 600) warpT = smooth(wt / 600);
+      else if (wt < 900) warpT = 1;
+      else if (wt < 1600) warpT = 1 - smooth((wt - 900) / 700);
+      else {
+        warpT = 0;
+        warpActive = false;
+      }
+    } else {
+      warpT = 0;
+    }
 
     if (!reduceMotion) {
       for (const b of blobs) {
@@ -630,9 +865,9 @@
     gaze.x = gnx * eye.h * 0.08;
     gaze.y = gny * eye.h * 0.08;
 
-    const eyeMix = smooth((smoothP - 0.02) / 0.3);
-    const playMix = smooth((smoothP - 0.56) / 0.3);
-    const eyeAlpha = eyeMix * (1 - playMix);
+    const eyeMix = smooth(smoothP / 0.22);
+    const playMix = smooth((smoothP - 0.52) / 0.12);
+    const eyeAlpha = eyeMix * (1 - playMix) * (1 - warpT);
     eyeMixState = eyeMix;
     playMixState = playMix;
 
@@ -702,7 +937,9 @@
       drawRing(now, eyeAlpha);
     }
 
-    if (playMix > 0.01) drawPlayOverlay(playMix);
+    if (playMix > 0.01 && warpT < 1) {
+      drawPlayOverlay(playMix * (1 - warpT));
+    }
 
     for (const b of blobs) if (!b.pupil) drawBlob(b, now, eyeMix, playMix);
     for (const b of blobs) if (b.pupil) drawBlob(b, now, eyeMix, playMix);
@@ -871,6 +1108,85 @@
       if (cursorEl) cursorEl.classList.remove('is-link');
     });
   }
+
+  if (playCta) {
+    playCta.addEventListener('pointerenter', () => {
+      if (cursorEl) cursorEl.classList.add('is-link');
+    });
+    playCta.addEventListener('pointerleave', () => {
+      if (cursorEl) cursorEl.classList.remove('is-link');
+    });
+
+    playCta.addEventListener('click', () => {
+      if (portalBusy || playMixState < 0.8) return;
+
+      portalBusy = true;
+      if (cursorEl) cursorEl.classList.remove('is-link');
+
+      if (!reduceMotion) {
+        warpActive = true;
+        warpStart = performance.now();
+      }
+
+      if (soundOn) {
+        chime(196);
+        setTimeout(() => chime(294), 160);
+        setTimeout(() => chime(392), 320);
+      }
+
+      setTimeout(() => {
+        warpActive = false;
+        warpT = 0;
+        enterRoom();
+        portalBusy = false;
+      }, reduceMotion ? 80 : 600);
+    });
+  }
+
+  if (roomBack) {
+    roomBack.addEventListener('click', exitRoom);
+    roomBack.addEventListener('pointerenter', () => {
+      if (cursorEl) cursorEl.classList.add('is-link');
+    });
+    roomBack.addEventListener('pointerleave', () => {
+      if (cursorEl) cursorEl.classList.remove('is-link');
+    });
+  }
+
+  window.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && roomMode) exitRoom();
+  });
+
+  window.addEventListener(
+    'wheel',
+    (e) => {
+      if (!roomMode) return;
+      e.preventDefault();
+      room.tz = Math.min(30000, Math.max(0, room.tz + e.deltaY * 0.9));
+    },
+    { passive: false }
+  );
+
+  window.addEventListener('pointerdown', (e) => {
+    if (!roomMode) return;
+    roomDrag = { x: e.clientX, y: e.clientY };
+  });
+
+  window.addEventListener('pointermove', (e) => {
+    if (!roomMode || !roomDrag) return;
+    const dy = roomDrag.y - e.clientY;
+    room.tz = Math.min(30000, Math.max(0, room.tz + dy * 2.2));
+    roomDrag.x = e.clientX;
+    roomDrag.y = e.clientY;
+  });
+
+  window.addEventListener('pointerup', () => {
+    roomDrag = null;
+  });
+
+  window.addEventListener('pointercancel', () => {
+    roomDrag = null;
+  });
 
   window.addEventListener('resize', () => {
     // La barra de Safari cambia solo la altura: no se reconstruye nada

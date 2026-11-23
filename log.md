@@ -29,6 +29,24 @@ Reglas:
 
 ---
 
+## 2026-11-23 — Sala de datos en 3D
+- **Cambios:** la pantalla de datos desaparece del scroll; al pulsar el play (tras el warp) se entra en una sala 3D a pantalla completa: túnel de manchas con profundidad, niebla y etiquetas flotantes (horas, canales, categorías…). El ratón gira la cámara, la rueda avanza/retrocede y en móvil se arrastra. Botón "volver" y `Esc` para salir; dentro, el scroll de la web queda bloqueado.
+- **Motivo:** petición del usuario: sentir que se mueve literalmente por los datos.
+- **Verificación:** sin verificación visual (sesión sin permisos de navegador).
+- **Pendientes:** sustituir las etiquetas de ejemplo por datos reales y probar rendimiento en móvil.
+
+## 2026-11-23 — Transición warp y datos solo por clic
+- **Cambios:** sustituido el portal por una huida de las manchas: al pulsar el play, las formas que lo componen salen despedidas hacia el espectador, se salta a la pantalla de datos y vuelven a asentarse detrás del título. La pantalla de datos ahora está `hidden` hasta el clic, así que no se puede alcanzar con scroll. El botón "click" sigue debajo del play.
+- **Motivo:** el usuario consideró cutre el portal y pidió que las formas llevaran a los datos y que el acceso fuera obligatoriamente por clic.
+- **Verificación:** sin verificación visual (sesión sin permisos de navegador).
+- **Pendientes:** probar en Safari y móvil.
+
+## 2026-11-23 — Portal al play y pantalla de datos
+- **Cambios:** botón invisible sobre el play con la pista "click" debajo. Al pulsarlo, un portal circular naranja cubre la pantalla, se salta a la cuarta sección ("Los datos · en construcción") y se revela. Se ajustaron los tiempos de aparición del ojo y del play a cuatro pantallas.
+- **Motivo:** pedido del usuario: una transición llamativa hacia los datos y una pista de clic.
+- **Verificación:** sin verificación visual (sesión sin permisos de navegador).
+- **Pendientes:** revisar la transición en Safari y en móvil.
+
 ## 2026-11-23 — Scroll con imán y guiño
 - **Cambios:** scroll vertical con ajuste obligatorio por pantalla (`scroll-snap`). Las manchas cercanas al puntero orbitan además de apartarse. Un clic sobre el ojo lo hace parpadear con un pequeño sonido, si el audio está activado.
 - **Motivo:** extras elegidos por el usuario.

@@ -7,18 +7,19 @@ Página web de un proyecto académico de Elisava. Una sola página con HTML, CSS
 - **Rama:** `main`.
 
 ## Contenido actual
-- **Home:** tres secciones apiladas con scroll vertical nativo y ajuste magnético por pantalla (portada, pregunta y cierre).
+- **Home:** tres secciones apiladas con scroll vertical nativo y ajuste magnético por pantalla (portada, pregunta y play).
 - **Sección 1:** "alvaropuertolas" a gran escala y "Algoritmo vs Voluntad" como kicker naranja.
 - **Sección 2:** la pregunta "¿Consumo lo que yo decido buscar o lo que la página de inicio me sirve en bandeja?".
-- **Sección 3:** sin texto; las manchas forman un play.
+- **Sección 3:** las manchas forman un play, con un botón de pista "click"; no se puede pasar de ahí con scroll.
+- **Sala de datos:** al pulsar el play, tras el warp, se entra en una sala 3D a pantalla completa: un túnel de manchas con etiquetas flotantes de datos. El ratón gira la cámara, la rueda o el arrastre avanzan; "volver" y `Esc` salen. Está en construcción.
 - **Entrada:** al cargar, las manchas forman el nombre, se disuelven y aparece el contenido; se puede saltar con cualquier gesto.
 - **Animación e interacción:** manchas grises irregulares en canvas, con rejilla, manchas grandes, contornos y cruces; forman un ojo con iris, pupila naranja y anillos. El ojo sigue el cursor y parpadea; las manchas cercanas orbitan el puntero; un clic sobre el ojo provoca un parpadeo con sonido. El fondo tiene parallax y grano de película. El cursor nativo se oculta con ratón y queda solo el anillo propio, que crece sobre el botón de sonido.
 - **Sonido:** pad grave y campanas generados con Web Audio; botón arriba a la derecha para activarlo o silenciarlo, apagado por defecto.
 
 ## Archivos
-- `index.html`: canvas de fondo, cursor, botón de sonido y tres secciones apiladas.
-- `style.css`: estilos. Diseño oscuro: fondo `#141415`, Helvetica, acento naranja `#ff5a36`, tipografía a gran escala, grano, cursor tipo lente y control de sonido.
-- `script.js`: motor de canvas (entrada con el nombre, ojo con mirada y parpadeo, play, parallax y fondo) y audio generado con Web Audio.
+- `index.html`: canvas de fondo, cursor, botón de sonido, tres secciones apiladas y la sala de datos.
+- `style.css`: estilos. Diseño oscuro: fondo `#141415`, Helvetica, acento naranja `#ff5a36`, tipografía a gran escala, grano, cursor tipo lente, control de sonido y sala de datos.
+- `script.js`: motor de canvas (entrada con el nombre, ojo con mirada y parpadeo, play, parallax, sala 3D) y audio generado con Web Audio.
 - `README.md`: solo el título del repositorio.
 - `personalidad.md`: cómo debe trabajar el asistente.
 - `criterio.md`: reglas de decisión.

@@ -108,6 +108,148 @@ h1 {
   color: var(--accent);
 }
 
+/* Tercera pantalla: botón invisible sobre el play */
+.panel--end {
+  position: relative;
+}
+
+.play-cta {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  z-index: 1;
+  width: calc(var(--play-w, 40vmin) + 80px);
+  height: calc(var(--play-h, 36vmin) * 1.32 + 96px);
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  transform: translate(-50%, -50%);
+}
+
+.play-cta:focus-visible {
+  outline: none;
+}
+
+.play-cta__hint {
+  position: absolute;
+  left: 50%;
+  bottom: 10px;
+  transform: translateX(-50%);
+  color: rgba(242, 239, 233, 0.45);
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.24em;
+  animation: hintPulse 2.4s ease-in-out infinite;
+  transition: color 0.3s ease;
+}
+
+.play-cta:hover .play-cta__hint,
+.play-cta:focus-visible .play-cta__hint {
+  color: var(--accent);
+}
+
+@keyframes hintPulse {
+  50% {
+    opacity: 0.35;
+  }
+}
+
+/* Sala de datos (pantalla completa) */
+.room {
+  position: fixed;
+  inset: 0;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  padding: clamp(20px, 3.5vw, 48px);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.6s ease;
+}
+
+.room[hidden] {
+  display: none;
+}
+
+.room.is-visible {
+  opacity: 1;
+}
+
+body.room-mode {
+  overflow: hidden;
+}
+
+body.room-mode main {
+  visibility: hidden;
+}
+
+.room__bar {
+  display: flex;
+  align-items: center;
+  gap: clamp(14px, 2vw, 26px);
+}
+
+.room__back {
+  pointer-events: auto;
+  padding: 10px 16px;
+  border: 1px solid rgba(242, 239, 233, 0.25);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  cursor: pointer;
+  transition: color 0.3s ease, border-color 0.3s ease;
+}
+
+.room__back:hover,
+.room__back:focus-visible {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
+.room__back:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+.room__status {
+  color: var(--accent);
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+}
+
+.room__hint {
+  position: absolute;
+  left: 50%;
+  bottom: clamp(26px, 4vh, 40px);
+  margin: 0;
+  transform: translateX(-50%);
+  color: rgba(242, 239, 233, 0.45);
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  white-space: nowrap;
+}
+
+.room__hint--touch {
+  display: none;
+}
+
+@media (pointer: coarse) {
+  .room__hint--mouse {
+    display: none;
+  }
+
+  .room__hint--touch {
+    display: block;
+  }
+}
+
 /* Grano de película (la textura la genera el JS en un tile estático) */
 .film {
   position: fixed;
@@ -254,5 +396,13 @@ html.cursor-hidden * {
   .sound.is-on .sound__bars i {
     animation: none;
     height: 8px;
+  }
+
+  .play-cta__hint {
+    animation: none;
+  }
+
+  .room {
+    transition: none;
   }
 }

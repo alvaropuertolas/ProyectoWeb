@@ -39,9 +39,22 @@
       </div>
     </section>
 
-    <section class="panel panel--end" aria-label="Los datos de YouTube, a continuación"></section>
+    <section class="panel panel--end" aria-label="Los datos de YouTube, a continuación">
+      <button class="play-cta" type="button" aria-label="Ver los datos, en construcción">
+        <span class="play-cta__hint">click</span>
+      </button>
+    </section>
 
   </main>
+
+  <div class="room" id="room" hidden>
+    <div class="room__bar">
+      <button class="room__back" type="button">← volver</button>
+      <span class="room__status">datos · en construcción</span>
+    </div>
+    <p class="room__hint room__hint--mouse">mueve el ratón · scroll para avanzar</p>
+    <p class="room__hint room__hint--touch">arrastra para mirar y avanzar</p>
+  </div>
 
   <script src="script.js?v=20261123"></script>
 </body>

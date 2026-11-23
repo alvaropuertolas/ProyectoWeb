@@ -10,10 +10,12 @@ Página web de una sola página, con HTML, CSS y JavaScript nativos. Sin framewo
 
 ## Decisiones
 - Mantener la estructura simple de la plantilla: HTML, CSS y JavaScript en archivos separados.
-- Home de tres pantallas apiladas (portada, pregunta y cierre con play) con scroll vertical nativo, al estilo onegrain.world.
+- Home de tres pantallas apiladas (portada, pregunta y play) con scroll vertical nativo y ajuste magnético, al estilo onegrain.world.
+- Tras el play se entra en una sala 3D a pantalla completa, con cámara navegable (ratón y rueda/arrastre) y etiquetas de datos en construcción.
 - Entrada con las manchas formando el nombre; se disuelven y el contenido aparece. Se puede saltar y respeta `prefers-reduced-motion`.
 - El ojo sigue el cursor y parpadea; al final se transforma en un play. Fondo con rejilla, capas de manchas, parallax, grano de película y cursor tipo lente.
 - Scroll con imán por pantalla; las manchas orbitan el puntero y un clic sobre el ojo lo hace parpadear con sonido.
+- Los datos están en construcción y solo se llega pulsando el play; con scroll no se pasa del play. Debajo hay una pista "click". La transición hace que las manchas salgan despedidas y den paso a la sala 3D; "volver"/Esc regresan al home.
 - Sonido generado con Web Audio (pad grave y campanas): solo se activa con el botón, apagado por defecto. Tras probar el autoplay se descartó porque los navegadores lo bloquean.
 - Sin cifras reales todavía; se descartaron los microtextos (barra superior, capítulos, pistas y progreso).
 - Paleta: fondo `#141415`, texto hueso y acento naranja `#ff5a36`.
