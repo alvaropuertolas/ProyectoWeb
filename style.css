@@ -233,21 +233,6 @@ body.room-mode main {
   letter-spacing: 0.16em;
 }
 
-.room__gyro {
-  display: none;
-}
-
-.room__gyro.is-on {
-  color: var(--accent);
-  border-color: var(--accent);
-}
-
-@media (pointer: coarse) {
-  .room__gyro {
-    display: inline-block;
-  }
-}
-
 /* Raíl de años de la sala */
 .room__years {
   position: absolute;
@@ -400,38 +385,30 @@ html.cursor-hidden * {
   outline-offset: 3px;
 }
 
-.sound__bars {
-  display: flex;
-  align-items: center;
-  gap: 3px;
-  height: 14px;
+.sound__icon {
+  display: block;
+  width: 22px;
+  height: 22px;
+  color: rgba(242, 239, 233, 0.6);
+  transition: color 0.3s ease;
 }
 
-.sound__bars i {
-  width: 2px;
-  height: 4px;
-  border-radius: 1px;
-  background: rgba(242, 239, 233, 0.45);
-  transition: background-color 0.3s ease;
+.sound:hover .sound__icon,
+.sound:focus-visible .sound__icon {
+  color: var(--ink);
 }
 
-.sound.is-on .sound__bars i {
-  background: var(--accent);
-  animation: eq 0.9s ease-in-out infinite;
+.sound.is-on .sound__icon {
+  color: var(--accent);
 }
 
-.sound.is-on .sound__bars i:nth-child(2) {
-  animation-delay: 0.15s;
+.sound__wave {
+  opacity: 0;
+  transition: opacity 0.25s ease;
 }
 
-.sound.is-on .sound__bars i:nth-child(3) {
-  animation-delay: 0.3s;
-}
-
-@keyframes eq {
-  50% {
-    height: 12px;
-  }
+.sound.is-on .sound__wave {
+  opacity: 1;
 }
 
 @media (max-width: 640px) {
@@ -456,12 +433,14 @@ html.cursor-hidden * {
   }
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .sound.is-on .sound__bars i {
-    animation: none;
-    height: 8px;
+@media (max-width: 480px) {
+  .room__status {
+    font-size: 0.62rem;
+    letter-spacing: 0.1em;
   }
+}
 
+@media (prefers-reduced-motion: reduce) {
   .play-cta__hint {
     animation: none;
   }

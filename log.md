@@ -30,8 +30,8 @@ Reglas:
 ---
 
 ## 2026-11-23 — Móvil a pantalla completa y giroscopio
-- **Cambios:** `viewport-fit=cover` y safe areas (`env(safe-area-inset-*)`) en paneles, sala, botón de sonido, raíl y pista inferior; la barra de la sala se envuelve y reserva espacio para el botón de sonido. Añadido botón "giroscopio" en la sala (visible en táctil) que pide permiso; en iOS se solicita al entrar por primera vez, dentro del gesto del play. Con el giroscopio activo la vista sigue la inclinación; el arrastre táctil sigue funcionando para avanzar y para mirar cuando está desactivado.
-- **Motivo:** la cabecera y el pie se cortaban en iOS y el usuario pidió giroscopio opcional.
+- **Cambios:** `viewport-fit=cover` y safe areas (`env(safe-area-inset-*)`) en paneles, sala, botón de sonido, raíl y pista inferior; la barra de la sala reserva espacio para el sonido y el estado se reduce en móvil. Eliminado el botón de giroscopio: el permiso se pide al pulsar el play (iOS exige un gesto) y, si se concede, la vista sigue la inclinación; el arrastre táctil sigue funcionando para avanzar y para mirar cuando el giro no está disponible. Icono de sonido cambiado a altavoz con ondas.
+- **Motivo:** la cabecera se pisaba con el sonido y el usuario quería el permiso sin botón.
 - **Verificación:** sin verificación visual (sesión sin permisos de navegador).
 - **Pendientes:** probar en iPhone real (Safari) y comprobar safe areas y permiso de movimiento.
 

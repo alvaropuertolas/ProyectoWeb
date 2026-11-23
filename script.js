@@ -7,7 +7,6 @@
   const playCta = document.querySelector('.play-cta');
   const roomEl = document.querySelector('#room');
   const roomBack = document.querySelector('.room__back');
-  const gyroBtn = document.querySelector('.room__gyro');
   const yearsEl = document.querySelector('#roomYears');
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -74,7 +73,6 @@
   let roomMode = false;
   let roomDrag = null;
   let gyroOn = false;
-  let gyroAsked = false;
   let gyroBase = null;
   let gyroYaw = 0;
   let gyroPitch = 0;
@@ -774,44 +772,28 @@
     gyroPitch = Math.max(-1, Math.min(1, db / 22)) * 0.4;
   }
 
-  function setGyroUI() {
-    if (!gyroBtn) return;
-    gyroBtn.classList.toggle('is-on', gyroOn);
-    gyroBtn.setAttribute('aria-pressed', String(gyroOn));
-    gyroBtn.textContent = gyroOn ? 'giroscopio ✓' : 'giroscopio';
+  function startGyro() {
+    if (gyroOn) return;
+    gyroBase = null;
+    gyroYaw = 0;
+    gyroPitch = 0;
+    window.addEventListener('deviceorientation', onOrient);
+    gyroOn = true;
   }
 
-  async function enableGyro() {
+  function requestGyro() {
+    if (gyroOn) return;
     if (typeof DeviceOrientationEvent === 'undefined') return;
 
-    try {
-      if (typeof DeviceOrientationEvent.requestPermission === 'function') {
-        const res = await DeviceOrientationEvent.requestPermission();
-        if (res !== 'granted') return;
-      }
-
-      gyroBase = null;
-      window.addEventListener('deviceorientation', onOrient);
-      gyroOn = true;
-      setGyroUI();
-    } catch (e) {
-      gyroOn = false;
-      setGyroUI();
+    if (typeof DeviceOrientationEvent.requestPermission === 'function') {
+      DeviceOrientationEvent.requestPermission()
+        .then((res) => {
+          if (res === 'granted') startGyro();
+        })
+        .catch(() => {});
+    } else {
+      startGyro();
     }
-  }
-
-  function toggleGyro() {
-    if (gyroOn) {
-      window.removeEventListener('deviceorientation', onOrient);
-      gyroOn = false;
-      gyroBase = null;
-      gyroYaw = 0;
-      gyroPitch = 0;
-      setGyroUI();
-      return;
-    }
-
-    enableGyro();
   }
 
   function renderRoom(now) {
@@ -834,7 +816,7 @@
       });
     }
 
-    if (gyroOn) {
+    if (gyroOn && gyroBase) {
       room.tyaw = gyroYaw;
       room.tpitch = gyroPitch;
     } else {
@@ -1277,16 +1259,8 @@
     playCta.addEventListener('click', () => {
       if (portalBusy || playMixState < 0.8) return;
 
-      // En iOS hay que pedir el permiso dentro de un gesto del usuario
-      if (
-        !gyroAsked &&
-        typeof DeviceOrientationEvent !== 'undefined' &&
-        typeof DeviceOrientationEvent.requestPermission === 'function' &&
-        window.matchMedia('(pointer: coarse)').matches
-      ) {
-        gyroAsked = true;
-        enableGyro();
-      }
+      // En iOS el permiso debe pedirse dentro del gesto del play
+      requestGyro();
 
       portalBusy = true;
       if (cursorEl) cursorEl.classList.remove('is-link');
@@ -1321,15 +1295,6 @@
     });
   }
 
-  if (gyroBtn) {
-    gyroBtn.addEventListener('click', toggleGyro);
-    gyroBtn.addEventListener('pointerenter', () => {
-      if (cursorEl) cursorEl.classList.add('is-link');
-    });
-    gyroBtn.addEventListener('pointerleave', () => {
-      if (cursorEl) cursorEl.classList.remove('is-link');
-    });
-  }
 
   window.addEventListener('keydown', (e) => {
     if (e.key === 'Escape' && roomMode) exitRoom();
