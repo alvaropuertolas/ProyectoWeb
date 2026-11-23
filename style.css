@@ -48,7 +48,11 @@ main {
   min-height: 100svh;
   display: flex;
   align-items: center;
-  padding: clamp(28px, 6vw, 80px);
+  padding:
+    calc(clamp(28px, 6vw, 80px) + env(safe-area-inset-top, 0px))
+    calc(clamp(28px, 6vw, 80px) + env(safe-area-inset-right, 0px))
+    calc(clamp(28px, 6vw, 80px) + env(safe-area-inset-bottom, 0px))
+    calc(clamp(28px, 6vw, 80px) + env(safe-area-inset-left, 0px));
   scroll-snap-align: start;
   scroll-snap-stop: always;
 }
@@ -162,7 +166,11 @@ h1 {
   z-index: 2;
   display: flex;
   flex-direction: column;
-  padding: clamp(20px, 3.5vw, 48px);
+  padding:
+    calc(clamp(20px, 3.5vw, 48px) + env(safe-area-inset-top, 0px))
+    calc(clamp(20px, 3.5vw, 48px) + env(safe-area-inset-right, 0px))
+    calc(clamp(20px, 3.5vw, 48px) + env(safe-area-inset-bottom, 0px))
+    calc(clamp(20px, 3.5vw, 48px) + env(safe-area-inset-left, 0px));
   pointer-events: none;
   opacity: 0;
   transition: opacity 0.6s ease;
@@ -186,8 +194,10 @@ body.room-mode main {
 
 .room__bar {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: clamp(14px, 2vw, 26px);
+  gap: clamp(10px, 2vw, 26px);
+  padding-right: 64px;
 }
 
 .room__back {
@@ -223,10 +233,25 @@ body.room-mode main {
   letter-spacing: 0.16em;
 }
 
+.room__gyro {
+  display: none;
+}
+
+.room__gyro.is-on {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
+@media (pointer: coarse) {
+  .room__gyro {
+    display: inline-block;
+  }
+}
+
 /* Raíl de años de la sala */
 .room__years {
   position: absolute;
-  right: clamp(14px, 3vw, 34px);
+  right: calc(clamp(14px, 3vw, 34px) + env(safe-area-inset-right, 0px));
   top: 50%;
   display: flex;
   flex-direction: column;
@@ -265,7 +290,7 @@ body.room-mode main {
 .room__hint {
   position: absolute;
   left: 50%;
-  bottom: clamp(26px, 4vh, 40px);
+  bottom: calc(clamp(26px, 4vh, 40px) + env(safe-area-inset-bottom, 0px));
   margin: 0;
   transform: translateX(-50%);
   color: rgba(242, 239, 233, 0.45);
@@ -348,8 +373,8 @@ html.cursor-hidden * {
 /* Control de sonido */
 .sound {
   position: fixed;
-  top: clamp(18px, 3vh, 30px);
-  right: clamp(18px, 3vw, 30px);
+  top: calc(clamp(18px, 3vh, 30px) + env(safe-area-inset-top, 0px));
+  right: calc(clamp(18px, 3vw, 30px) + env(safe-area-inset-right, 0px));
   z-index: 4;
   width: 44px;
   height: 44px;
