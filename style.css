@@ -85,7 +85,7 @@ body.is-intro .panel--cover .panel-inner {
   font-size: clamp(1.25rem, 2.4vw, 2.1rem);
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: -0.02em;
+  letter-spacing: 0;
 }
 
 h1 {
@@ -93,7 +93,7 @@ h1 {
   font-size: clamp(2.5rem, 15vw, 17rem);
   font-weight: 400;
   line-height: 0.85;
-  letter-spacing: -0.1em;
+  letter-spacing: -0.07em;
   white-space: nowrap;
 }
 
@@ -135,15 +135,20 @@ h1 {
   outline: none;
 }
 
+.play-cta:focus-visible .play-cta__hint {
+  outline: 2px solid var(--accent);
+  outline-offset: 6px;
+}
+
 .play-cta__hint {
   position: absolute;
   left: 50%;
   bottom: 10px;
   transform: translateX(-50%);
-  color: rgba(242, 239, 233, 0.45);
-  font-size: 0.68rem;
+  color: rgba(242, 239, 233, 0.6);
+  font-size: 0.7rem;
   text-transform: uppercase;
-  letter-spacing: 0.24em;
+  letter-spacing: 0.18em;
   animation: hintPulse 2.4s ease-in-out infinite;
   transition: color 0.3s ease;
 }
@@ -208,9 +213,9 @@ body.room-mode main {
   background: transparent;
   color: var(--ink);
   font: inherit;
-  font-size: 0.72rem;
+  font-size: 0.7rem;
   text-transform: uppercase;
-  letter-spacing: 0.16em;
+  letter-spacing: 0.18em;
   cursor: pointer;
   transition: color 0.3s ease, border-color 0.3s ease;
 }
@@ -228,9 +233,9 @@ body.room-mode main {
 
 .room__status {
   color: var(--accent);
-  font-size: 0.72rem;
+  font-size: 0.7rem;
   text-transform: uppercase;
-  letter-spacing: 0.16em;
+  letter-spacing: 0.18em;
 }
 
 /* Raíl de años de la sala */
@@ -250,9 +255,9 @@ body.room-mode main {
   padding: 0;
   border: 0;
   background: none;
-  color: rgba(242, 239, 233, 0.35);
+  color: rgba(242, 239, 233, 0.6);
   font: inherit;
-  font-size: 0.68rem;
+  font-size: 0.7rem;
   letter-spacing: 0.1em;
   cursor: pointer;
   transition: color 0.3s ease;
@@ -278,8 +283,8 @@ body.room-mode main {
   bottom: calc(clamp(26px, 4vh, 40px) + env(safe-area-inset-bottom, 0px));
   margin: 0;
   transform: translateX(-50%);
-  color: rgba(242, 239, 233, 0.45);
-  font-size: 0.68rem;
+  color: rgba(242, 239, 233, 0.6);
+  font-size: 0.7rem;
   text-transform: uppercase;
   letter-spacing: 0.18em;
   white-space: nowrap;

@@ -29,6 +29,12 @@ Reglas:
 
 ---
 
+## 2026-11-24 — Ajustes de diseño tras revisión
+- **Cambios:** en `style.css`, los microtextos (pista del play, pista de la sala y años del raíl) pasan a opacidad 0.6 para mejorar el contraste. El foco con teclado del play se marca con un contorno naranja en la pista. Todos los microtextos quedan en 0.7rem con 0.18em de tracking. El kicker pasa a tracking 0 y el nombre de -0.1em a -0.07em. En `index.html`, la pista "click" pasa a "pulsa" y se sube la versión de caché de los archivos.
+- **Motivo:** el usuario pidió aplicar las mejoras de la revisión de diseño.
+- **Verificación:** diff revisado; sin comprobación visual porque la captura de Safari salió en blanco.
+- **Pendientes:** revisar en el navegador el espaciado del nombre y la legibilidad del raíl.
+
 ## 2026-11-23 — Móvil a pantalla completa y giroscopio
 - **Cambios:** `viewport-fit=cover` y safe areas (`env(safe-area-inset-*)`) en paneles, sala, botón de sonido, raíl y pista inferior; la barra de la sala reserva espacio para el sonido y el estado se reduce en móvil. Eliminado el botón de giroscopio: el permiso se pide al pulsar el play (iOS exige un gesto) y, si se concede, la vista sigue la inclinación; el arrastre táctil sigue funcionando para avanzar y para mirar cuando el giro no está disponible. Icono de sonido cambiado a altavoz con ondas.
 - **Motivo:** la cabecera se pisaba con el sonido y el usuario quería el permiso sin botón.
