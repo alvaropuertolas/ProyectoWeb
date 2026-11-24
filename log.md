@@ -29,6 +29,12 @@ Reglas:
 
 ---
 
+## 2026-11-24 — Fichas del loop
+- **Cambios:** añadida la carpeta `fichas/` con una ficha por scroll (portada, pregunta y play/sala). Cada ficha recoge qué se pidió, qué se obtuvo, cómo se verificó, dónde decido yo y quién verifica.
+- **Motivo:** entrega pedida por el profesor.
+- **Verificación:** contenido sacado de este log y del historial de git.
+- **Pendientes:** el usuario revisa las columnas "Verificación" y "Dónde decido yo".
+
 ## 2026-11-24 — Ajustes de diseño tras revisión
 - **Cambios:** en `style.css`, los microtextos (pista del play, pista de la sala y años del raíl) pasan a opacidad 0.6 para mejorar el contraste. El foco con teclado del play se marca con un contorno naranja en la pista. Todos los microtextos quedan en 0.7rem con 0.18em de tracking. El kicker pasa a tracking 0 y el nombre de -0.1em a -0.07em. En `index.html`, la pista "click" pasa a "pulsa" y se sube la versión de caché de los archivos.
 - **Motivo:** el usuario pidió aplicar las mejoras de la revisión de diseño.

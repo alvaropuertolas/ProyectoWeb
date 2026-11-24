@@ -26,6 +26,7 @@ Página web de un proyecto académico de Elisava. Una sola página con HTML, CSS
 - `criterio.md`: reglas de decisión.
 - `log.md`: registro de cambios.
 - `memoria.md`: estado y decisiones del proyecto.
+- `fichas/`: una ficha del loop por scroll (qué se pidió, qué se dio, quién decide y quién verifica).
 
 ## Estado
 - El home está montado (2026-11-22); pendiente la revisión visual en navegador.
