@@ -18,7 +18,7 @@ Página web de una sola página, con HTML, CSS y JavaScript nativos. Sin framewo
 - Scroll con imán por pantalla; las manchas orbitan el puntero y un clic sobre el ojo lo hace parpadear con sonido.
 - Los datos están en construcción y solo se llega pulsando el play; con scroll no se pasa del play. Debajo hay una pista "click". La transición hace que las manchas salgan despedidas y den paso a la sala 3D; "volver"/Esc regresan al home.
 - Sonido generado con Web Audio (pad grave y campanas): solo se activa con el botón, apagado por defecto. Tras probar el autoplay se descartó porque los navegadores lo bloquean.
-- Sin cifras reales todavía; se descartaron los microtextos (barra superior, capítulos, pistas y progreso).
+- Cifras reales del Takeout orientadas a algoritmo vs voluntad; 2019–2022 reconstruidos y marcados. HUD de telemetría en mono y Kuronuri como segunda voz, que se pixela cuanto más manda el algoritmo; capítulo final "fin": se construye una sala virtual con una TV antigua que enseña el veredicto. Cada año tiene su mundo 3D y la cámara pierde control según el % de algoritmo; los datos de todos los años siguen el mismo hilo: vídeos, búsquedas y vídeos por búsqueda (2026-11-26). La portada pone la tesis como titular y el nombre como firma; la entrada sigue formando el nombre con manchas. 2019–2022 se muestran sin la etiqueta de reconstruidos por decisión del usuario.
 - Paleta: fondo `#141415`, texto hueso y acento naranja `#ff5a36`.
 
 ## Estado

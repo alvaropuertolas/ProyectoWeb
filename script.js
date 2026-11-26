@@ -1,13 +1,26 @@
 (() => {
   const canvas = document.querySelector('#grain');
   const ctx = canvas.getContext('2d');
-  const h1 = document.querySelector('h1');
   const cursorEl = document.querySelector('.cursor');
   const soundBtn = document.querySelector('.sound');
   const playCta = document.querySelector('.play-cta');
   const roomEl = document.querySelector('#room');
   const roomBack = document.querySelector('.room__back');
   const yearsEl = document.querySelector('#roomYears');
+  const cardEl = document.querySelector('#roomCard');
+  const verdictEl = document.querySelector('#verdict');
+  const teleZ = document.querySelector('#teleZ');
+  const teleHead = document.querySelector('#teleHead');
+  const hud = {
+    clock: document.querySelector('#hudClock'),
+    status: document.querySelector('#hudStatus'),
+    gaze: document.querySelector('#hudGaze'),
+    count: document.querySelector('#hudCount'),
+    panel: document.querySelector('#hudPanel'),
+    panelName: document.querySelector('#hudPanelName'),
+    ticks: document.querySelector('.hud__ticks'),
+    last: ''
+  };
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   const TAU = Math.PI * 2;
@@ -53,7 +66,33 @@
   let warpT = 0;
 
   const ROOM_DEPTH = 2400;
-  const YEARS = [2019, 2020, 2021, 2022, 2023, 2024, 2025];
+  // Datos de Google Takeout (YouTube). Un mismo hilo para todos los años:
+  // algo = % de reproducciones sin búsqueda en los 2 min previos, y vídeos por
+  // cada búsqueda. 2019–2022 no tienen historial: se reconstruyen con la tendencia
+  // de 2023–2025 (est: true). 2023 solo tiene búsquedas desde julio: se anualizan.
+  // world = qué se ve en el espacio 3D de ese año.
+  const DATA = [
+    { year: 2019, level: 0, est: true, algo: 58, world: 'search', beat: 'Buscaba yo. La pantalla obedecía.',
+      stats: [['vídeos', 6800, '≈'], ['búsquedas', 4250, '≈'], ['vídeos por búsqueda', 1.6, '≈']] },
+    { year: 2020, level: 0, est: true, algo: 66, world: 'orbit', beat: 'Encerrado en casa, dejé que eligiera ella.',
+      stats: [['vídeos', 9400, '≈'], ['búsquedas', 4700, '≈'], ['vídeos por búsqueda', 2.0, '≈']] },
+    { year: 2021, level: 20, est: true, algo: 71, world: 'clock', beat: 'La página de inicio aprendió mis horas.',
+      stats: [['vídeos', 10200, '≈'], ['búsquedas', 4250, '≈'], ['vídeos por búsqueda', 2.4, '≈']] },
+    { year: 2022, level: 20, est: true, algo: 76, world: 'feed', beat: 'Ya no buscaba. Solo bajaba.',
+      stats: [['vídeos', 11100, '≈'], ['búsquedas', 3830, '≈'], ['vídeos por búsqueda', 2.9, '≈']] },
+    { year: 2023, level: 50, algo: 79, world: 'chain', beat: 'Ocho de cada diez vídeos llegaron solos.',
+      stats: [['vídeos', 12309], ['búsquedas', 3600, '≈'], ['vídeos por búsqueda', 3.4]] },
+    { year: 2024, level: 50, algo: 83, world: 'tunnel', beat: 'El año que más vi. 43 vídeos al día.',
+      stats: [['vídeos', 15605], ['búsquedas', 3499], ['vídeos por búsqueda', 4.5]] },
+    { year: 2025, level: 100, algo: 86, world: 'vortex', beat: '223 vídeos en un solo día.',
+      stats: [['vídeos', 7660], ['búsquedas', 1366], ['vídeos por búsqueda', 5.6]] },
+    // Último capítulo: responde a la pregunta del home
+    { year: 'fin', verdict: true, algo: 86, world: 'tv' }
+  ];
+  // Reproducciones por hora del día (00–23), normalizadas: el reloj de 2021
+  const HOURS = [0.44, 0.41, 0.32, 0.13, 0.03, 0.01, 0, 0.01, 0.04, 0.04, 0.05, 0.15,
+    0.39, 0.7, 0.91, 0.82, 0.84, 0.81, 0.78, 0.88, 0.93, 1, 0.77, 0.66];
+  const YEARS = DATA.map((d) => d.year);
   const CHAPTER_GAP = 900;
   const ROOM_MAX_Z = CHAPTER_GAP * (YEARS.length - 1);
   const room = {
@@ -306,7 +345,7 @@
     });
   }
 
-  /* Puntos del nombre para la entrada: se dibuja el h1 en un canvas oculto y se muestrean sus píxeles */
+  /* Puntos del nombre para la entrada: se dibuja el nombre en un canvas oculto y se muestrean sus píxeles */
   function buildNameTargets() {
     const off = document.createElement('canvas');
     off.width = vw;
@@ -314,13 +353,14 @@
     const o = off.getContext('2d', { willReadFrequently: true });
     if (!o) return false;
 
-    const cs = getComputedStyle(h1);
-    const rect = h1.getBoundingClientRect();
-    o.font = `${cs.fontWeight} ${cs.fontSize} ${cs.fontFamily}`;
-    if ('letterSpacing' in o) o.letterSpacing = cs.letterSpacing;
+    // El nombre ya no es el titular: la entrada lo dibuja grande por su cuenta (firma)
+    const size = Math.min(vw * 0.13, 240);
+    o.font = `400 ${size}px Helvetica, "Helvetica Neue", Arial, sans-serif`;
+    if ('letterSpacing' in o) o.letterSpacing = `${-0.07 * size}px`;
     o.textBaseline = 'middle';
+    o.textAlign = 'center';
     o.fillStyle = '#fff';
-    o.fillText('alvaropuertolas', rect.left, rect.top + rect.height / 2);
+    o.fillText('alvaropuertolas', vw / 2, vh / 2);
 
     let data;
     try {
@@ -665,36 +705,43 @@
       };
     });
 
-    room.chapters = YEARS.map((year, i) => ({
-      year,
-      z: 600 + i * CHAPTER_GAP,
-      labels: [
-        { name: 'horas', dx: -250, dy: 170 },
-        { name: 'vídeos', dx: 20, dy: 210 },
-        { name: 'canales', dx: 270, dy: 180 }
-      ]
+    room.chapters = DATA.map((d, i) => ({
+      year: d.year,
+      algo: d.algo / 100,
+      verdict: !!d.verdict,
+      z: 600 + i * CHAPTER_GAP
     }));
 
-    // Nube propia alrededor de cada año
-    const cluster = vw < 700 ? 14 : 26;
-
+    // Cada año construye su propio mundo con su dato
+    const small = vw < 700;
     for (const c of room.chapters) {
-      for (let k = 0; k < cluster; k++) {
-        const a = rnd(0, TAU);
-        const r = rnd(120, 420);
-        room.pts.push({
-          x: Math.cos(a) * r,
-          y: Math.sin(a) * r * 0.7,
-          z: c.z + rnd(-180, 180),
-          size: rnd(2, 8),
-          shape: makeShape(5 + Math.floor(rnd(0, 4))),
-          rot: rnd(0, TAU),
-          vr: rnd(-0.0015, 0.0015),
-          phase: rnd(0, TAU),
-          ws: rnd(0.3, 0.9),
-          wob: rnd(2, 8),
-          color: Math.random() < 0.2 ? ACCENT : GRAYS[Math.floor(rnd(0, GRAYS.length))]
-        });
+      c.world = DATA[room.chapters.indexOf(c)].world;
+      const n = (big, little) => (small ? little : big);
+      c.items = [];
+      if (c.world === 'orbit') {
+        for (let k = 0; k < n(120, 60); k++) {
+          c.items.push({ a: rnd(0, TAU), r: rnd(160, 480), dz: rnd(-220, 220), size: rnd(4, 11), shape: makeShape(6), hot: Math.random() < c.algo * 0.5 });
+        }
+      } else if (c.world === 'feed') {
+        for (let col = -1; col <= 1; col++) {
+          for (let row = 0; row < 7; row++) c.items.push({ x: col * 300, y: row * 190, hot: Math.random() < 0.2 });
+        }
+      } else if (c.world === 'chain') {
+        for (let k = 0; k < n(48, 30); k++) {
+          const t = k / n(48, 30);
+          c.items.push({ x: Math.cos(t * TAU * 2.2) * (180 + t * 220), y: Math.sin(t * TAU * 2.2) * (140 + t * 160), dz: -320 + t * 640 });
+        }
+      } else if (c.world === 'tunnel') {
+        for (let k = 0; k < n(150, 80); k++) {
+          c.items.push({ a: rnd(0, TAU), r: rnd(420, 640), dz: rnd(-450, 450), hot: Math.random() < c.algo * 0.35 });
+        }
+      } else if (c.world === 'vortex') {
+        // 223: los vídeos de su peor día
+        for (let k = 0; k < n(223, 120); k++) c.items.push({ a: rnd(0, TAU), r: rnd(60, 560), dz: rnd(-300, 300), sp: rnd(0.6, 1.4) });
+      } else if (c.world === 'search') {
+        for (let k = 0; k < n(28, 16); k++) {
+          c.items.push({ a: rnd(0, TAU), r: rnd(200, 520), dz: rnd(-200, 200), size: rnd(2, 5), shape: makeShape(5) });
+        }
       }
     }
 
@@ -712,6 +759,7 @@
         });
         b.addEventListener('pointerenter', () => {
           if (cursorEl) cursorEl.classList.add('is-link');
+          decode(b, String(c.year), 320);
         });
         b.addEventListener('pointerleave', () => {
           if (cursorEl) cursorEl.classList.remove('is-link');
@@ -722,6 +770,131 @@
     }
 
     room.built = true;
+  }
+
+  // es-ES no agrupa los números de 4 cifras; aquí sí (6.800)
+  const fmt = (n) => String(n).replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+  let cardMix = 0;
+
+  // Texto que se descifra: los caracteres giran y se asientan de izquierda a derecha
+  const GLYPHS = '▓▒░#/<>_—01';
+  function decode(el, text, dur = 600) {
+    if (reduceMotion) {
+      el.textContent = text;
+      return;
+    }
+    const t0 = performance.now();
+    el._decode = t0;
+    const step = (now) => {
+      if (el._decode !== t0) return;
+      const k = (now - t0) / dur;
+      let out = '';
+      for (let j = 0; j < text.length; j++) {
+        const settle = j / text.length;
+        out += k > settle || text[j] === ' ' ? text[j] : GLYPHS[(Math.random() * GLYPHS.length) | 0];
+      }
+      el.textContent = out;
+      if (k < 1) requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
+  }
+
+  // Cada texto marcado se descifra la primera vez que entra en pantalla
+  if ('IntersectionObserver' in window) {
+    const io = new IntersectionObserver((entries) => {
+      for (const e of entries) {
+        if (!e.isIntersecting || document.body.classList.contains('is-intro')) continue;
+        decode(e.target, e.target.dataset.text, 900);
+        io.unobserve(e.target);
+      }
+    }, { threshold: 0.6 });
+    document.querySelectorAll('[data-decode]').forEach((el) => {
+      el.dataset.text = el.textContent;
+      io.observe(el);
+    });
+    // La portada se descifra al terminar la entrada
+    setTimeout(() => {
+      document.querySelectorAll('.panel--cover [data-decode]').forEach((el) => {
+        decode(el, el.dataset.text, 900);
+        io.unobserve(el);
+      });
+    }, intro.active ? HOLD_END : 0);
+  }
+  let cardTimer = 0;
+
+  // Cuenta hacia arriba cada cifra de la ficha
+  function countUp(el, to, pre, suf, dec = !Number.isInteger(to)) {
+    const t0 = performance.now();
+    const dur = reduceMotion ? 0 : 900;
+    const step = (now) => {
+      const k = dur ? smooth((now - t0) / dur) : 1;
+      const v = dec ? (to * k).toFixed(1).replace('.', ',') : fmt(Math.round(to * k));
+      el.textContent = pre + v + suf;
+      if (k < 1 && roomMode) requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
+  }
+
+  function showCard(i) {
+    const d = DATA[i];
+    if (!d || !cardEl) return;
+
+    roomEl.classList.toggle('is-verdict', !!d.verdict);
+    // Cada año entra con una nota más grave y más sucia
+    if (d.verdict) {
+      blip(70, 2.2, 'sine', 0.22, 38);
+      setTimeout(() => blip(41, 2.5, 'triangle', 0.12), 120);
+    } else {
+      blip(660 - i * 55, 0.7, i > 3 ? 'triangle' : 'sine', 0.05);
+    }
+    if (audio && audio.noiseGain && soundOn) {
+      // En el veredicto el ruido se corta: silencio antes del golpe
+      audio.master.gain.setTargetAtTime(d.verdict ? 0.04 : 0.16, audio.ctx.currentTime, 0.3);
+    }
+    if (verdictEl) verdictEl.classList.toggle('is-on', !!d.verdict);
+    room.verdictAt = d.verdict ? performance.now() : 0;
+    // La TV se enciende: chasquido, pitido agudo y un golpe de estática
+    if (d.verdict) {
+      setTimeout(() => {
+        if (!room.verdictAt) return;
+        blip(140, 0.25, 'square', 0.05, 60);
+        blip(7800, 1.6, 'sine', 0.008);
+        if (audio && soundOn) {
+          const t = audio.ctx.currentTime;
+          audio.noiseGain.gain.setTargetAtTime(0.16, t, 0.02);
+          audio.noiseGain.gain.setTargetAtTime(0.012, t + 0.35, 0.25);
+        }
+      }, reduceMotion ? 0 : 1950);
+    }
+    if (d.verdict) return;
+
+    cardEl.classList.add('is-swapping');
+    clearTimeout(cardTimer);
+    cardTimer = setTimeout(() => {
+      cardMix = 0;
+      cardEl.querySelector('#cardYear').textContent = d.year;
+      const beat = cardEl.querySelector('#cardBeat');
+      beat.dataset.level = d.level;
+      decode(beat, d.beat, 700);
+
+      const stats = cardEl.querySelector('#cardStats');
+      stats.innerHTML = '';
+      for (const [label, value, pre = '', suf = ''] of d.stats) {
+        const dt = document.createElement('dt');
+        const dd = document.createElement('dd');
+        dt.textContent = label;
+        stats.append(dt, dd);
+        countUp(dd, value, pre ? pre + ' ' : '', suf, label === 'vídeos por búsqueda');
+      }
+
+      cardEl.querySelector('#splitAlgo').style.width = '0%';
+      requestAnimationFrame(() => {
+        cardEl.querySelector('#splitAlgo').style.width = d.algo + '%';
+      });
+      countUp(cardEl.querySelector('#splitA'), d.algo, '', '%');
+      countUp(cardEl.querySelector('#splitV'), 100 - d.algo, '', '%');
+      cardEl.classList.remove('is-swapping');
+    }, reduceMotion ? 0 : 250);
   }
 
   function enterRoom() {
@@ -827,6 +1000,539 @@
     }
   }
 
+  // Pantalla de la TV: se pinta en un canvas aparte y se proyecta sobre el cristal
+  const tvCanvas = document.createElement('canvas');
+  tvCanvas.width = 640;
+  tvCanvas.height = 552;
+  const tv = tvCanvas.getContext('2d');
+
+  function paintScreen(on, num, now) {
+    const W = tvCanvas.width;
+    const H = tvCanvas.height;
+    tv.fillStyle = '#0f0f10';
+    tv.fillRect(0, 0, W, H);
+
+    if (on < 1) {
+      // Encendido de tele antigua: una raya que se abre en horizontal y luego en vertical
+      const w = W * Math.min(1, on * 2);
+      const h = on < 0.5 ? 3 : 3 + (H - 3) * ((on - 0.5) * 2);
+      tv.fillStyle = `rgba(242, 239, 233, ${0.9 - on * 0.6})`;
+      tv.fillRect((W - w) / 2, (H - h) / 2, w, h);
+      return;
+    }
+
+    const jump = Math.sin(now * 0.0021) > 0.985 ? (Math.random() - 0.5) * 30 : 0;
+    tv.save();
+    tv.translate(0, jump);
+    tv.textBaseline = 'alphabetic';
+    tv.textAlign = 'left';
+    tv.fillStyle = '#ff5a36';
+    tv.font = '400 18px ui-monospace, Menlo, monospace';
+    tv.fillText('VEREDICTO · 2025', 40, 58);
+    tv.textAlign = 'right';
+    tv.fillText('CH ' + String(Math.round(num)).padStart(2, '0'), W - 40, 58);
+
+    tv.textAlign = 'left';
+    tv.fillStyle = '#f2efe9';
+    tv.font = '400 230px Helvetica, "Helvetica Neue", Arial, sans-serif';
+    tv.fillText(String(Math.round(num)), 30, 300);
+    tv.fillStyle = '#ff5a36';
+    tv.font = '400 80px Helvetica, "Helvetica Neue", Arial, sans-serif';
+    tv.fillText('%', 285, 300);
+
+    tv.fillStyle = '#f2efe9';
+    tv.font = 'italic 400 38px "Kuronuri 100", Georgia, serif';
+    tv.fillText('de lo que vi', 40, 380);
+    tv.fillText('no lo elegí yo.', 40, 425);
+
+    // 10 × 10: cada casilla un 1 %, naranja las que eligió el algoritmo
+    const cell = 18;
+    const gap = 5;
+    const ox = W - 40 - (cell + gap) * 10 + gap;
+    const oy = 140;
+    for (let k = 0; k < 100; k++) {
+      const x = ox + (k % 10) * (cell + gap);
+      const y = oy + Math.floor(k / 10) * (cell + gap);
+      if (k < num) {
+        tv.fillStyle = '#ff5a36';
+        tv.fillRect(x, y, cell, cell);
+      } else if (num >= 86) {
+        tv.fillStyle = '#f2efe9';
+        tv.fillRect(x, y, cell, cell);
+      } else {
+        tv.strokeStyle = 'rgba(242, 239, 233, 0.3)';
+        tv.strokeRect(x + 0.5, y + 0.5, cell - 1, cell - 1);
+      }
+    }
+    tv.restore();
+
+    // Líneas de barrido, estática y viñeta
+    tv.fillStyle = 'rgba(0, 0, 0, 0.28)';
+    for (let y = 0; y < H; y += 4) tv.fillRect(0, y, W, 1.5);
+    tv.fillStyle = 'rgba(242, 239, 233, 0.07)';
+    for (let k = 0; k < 160; k++) tv.fillRect(Math.random() * W, Math.random() * H, 2, 2);
+    const vg = tv.createRadialGradient(W / 2, H / 2, H * 0.3, W / 2, H / 2, H * 0.8);
+    vg.addColorStop(0, 'rgba(0, 0, 0, 0)');
+    vg.addColorStop(1, 'rgba(0, 0, 0, 0.6)');
+    tv.fillStyle = vg;
+    tv.fillRect(0, 0, W, H);
+  }
+
+  // Sala final: suelo, paredes y una tele antigua que se construyen línea a línea
+  function drawTV(zc, P, now, fog) {
+    const el = room.verdictAt ? now - room.verdictAt : 0;
+    const bt = reduceMotion ? 1 : clamp01(el / 2600);
+    if (bt <= 0) return;
+    const seg = (a, b) => clamp01((bt - a) / (b - a));
+    const B = (a) => `rgba(242, 239, 233, ${a * fog})`;
+    const L = (a, b, k, col) => {
+      if (k <= 0) return;
+      const p = P(a[0], a[1], a[2]);
+      const q = P(b[0], b[1], b[2]);
+      if (!p || !q) return;
+      ctx.strokeStyle = col;
+      ctx.beginPath();
+      ctx.moveTo(p.x, p.y);
+      ctx.lineTo(p.x + (q.x - p.x) * k, p.y + (q.y - p.y) * k);
+      ctx.stroke();
+    };
+    const poly = (pts, fill, stroke) => {
+      const q = pts.map((v) => P(v[0], v[1], v[2]));
+      if (q.some((v) => !v)) return null;
+      ctx.beginPath();
+      q.forEach((v, k) => (k ? ctx.lineTo(v.x, v.y) : ctx.moveTo(v.x, v.y)));
+      ctx.closePath();
+      if (fill) {
+        ctx.fillStyle = fill;
+        ctx.fill();
+      }
+      if (stroke) {
+        ctx.strokeStyle = stroke;
+        ctx.stroke();
+      }
+      return q;
+    };
+
+    const X = 950;
+    const FY = 330;
+    const CY = -650;
+    const z0 = zc - 300;
+    const z1 = zc + 1150;
+    ctx.lineWidth = 1;
+
+    // La tele: girada tres cuartos para que se vea su volumen
+    const mid = zc + 700;
+    const ang = 0.38 + Math.sin(now * 0.00025) * 0.03;
+    const ca = Math.cos(ang);
+    const sa = Math.sin(ang);
+    const tw = (v) => [v[0] * ca - v[2] * sa, v[1], mid + v[0] * sa + v[2] * ca];
+    const LT = (a2, b2, k, col) => L(tw(a2), tw(b2), k, col);
+    const PT = (v) => { const w = tw(v); return P(w[0], w[1], w[2]); };
+    const tx = 320;
+    const ty = 230;
+    const fz = -150;
+    const bz = 150;
+    const on = seg(0.72, 0.9);
+
+    // La única luz es la pantalla: parpadea con ella y cae con la distancia
+    const flick = on * (0.82 + 0.18 * Math.random() * (Math.sin(now * 0.013) > 0.6 ? 1 : 0.3));
+    const LP = tw([-60, 0, fz - 40]);
+    const lit = (v) => {
+      const dx = v[0] - LP[0];
+      const dy = v[1] - LP[1];
+      const dz = v[2] - LP[2];
+      return 1 / (1 + (dx * dx + dy * dy + dz * dz) / (430 * 430));
+    };
+    // Línea iluminada: casi invisible lejos de la tele
+    // En tramos: cada trozo recibe su propia luz y la línea se apaga hacia la oscuridad
+    const LL = (a2, b2, k, base) => {
+      const n2 = 8;
+      for (let j = 0; j < n2 && j / n2 < k; j++) {
+        const t0 = j / n2;
+        const t1 = Math.min(k, (j + 1) / n2);
+        const pA = [0, 1, 2].map((d) => a2[d] + (b2[d] - a2[d]) * t0);
+        const pB = [0, 1, 2].map((d) => a2[d] + (b2[d] - a2[d]) * t1);
+        const l = lit([(pA[0] + pB[0]) / 2, (pA[1] + pB[1]) / 2, (pA[2] + pB[2]) / 2]);
+        L(pA, pB, 1, B(Math.min(0.85, base * (0.01 + l * l * 2.2 * (0.2 + flick)))));
+      }
+    };
+
+    // Todo lo demás se hunde en negro alrededor de la tele
+    const lpP = P(LP[0], LP[1], LP[2]);
+    if (lpP) {
+      const R = Math.max(vw, vh);
+      const dark = ctx.createRadialGradient(lpP.x, lpP.y, R * 0.08, lpP.x, lpP.y, R * 0.8);
+      dark.addColorStop(0, 'rgba(6, 6, 7, 0)');
+      dark.addColorStop(1, `rgba(6, 6, 7, ${0.94 * bt})`);
+      ctx.fillStyle = dark;
+      ctx.fillRect(-vw, -vh, vw * 3, vh * 3);
+      ctx.fillStyle = `rgba(6, 6, 7, ${0.72 * bt})`;
+      ctx.fillRect(-vw, -vh, vw * 3, vh * 3);
+    }
+
+    // Suelo de baldosas
+    let n = 0;
+    for (let x = -X; x <= X; x += 160, n++) LL([x, FY, z0], [x, FY, z1], seg(n * 0.012, 0.25 + n * 0.012), 0.5);
+    n = 0;
+    for (let z = z0; z <= z1; z += 160, n++) LL([-X, FY, z], [X, FY, z], seg(0.05 + n * 0.015, 0.3 + n * 0.015), 0.4);
+
+    // Paredes alicatadas: aristas, juntas horizontales y verticales
+    const kw = seg(0.15, 0.5);
+    LL([-X, FY, z1], [-X, CY, z1], kw, 0.7);
+    LL([X, FY, z1], [X, CY, z1], kw, 0.7);
+    LL([-X, CY, z1], [X, CY, z1], kw, 0.6);
+    LL([-X, CY, z0], [-X, CY, z1], kw, 0.5);
+    LL([X, CY, z0], [X, CY, z1], kw, 0.5);
+    const kt = seg(0.3, 0.6);
+    for (let y = FY - 90; y > CY; y -= 90) {
+      LL([-X, y, z1], [X, y, z1], kt, 0.35);
+      LL([-X, y, z0], [-X, y, z1], kt, 0.3);
+      LL([X, y, z0], [X, y, z1], kt, 0.3);
+    }
+    for (let x = -X + 180; x < X; x += 180) LL([x, FY, z1], [x, CY, z1], kt, 0.25);
+    for (let z = z0 + 180; z < z1; z += 180) {
+      LL([-X, FY, z], [-X, CY, z], kt, 0.2);
+      LL([X, FY, z], [X, CY, z], kt, 0.2);
+    }
+    // Zócalo
+    LL([-X, FY - 30, z0], [-X, FY - 30, z1], kt, 0.6);
+    LL([X, FY - 30, z0], [X, FY - 30, z1], kt, 0.6);
+    LL([-X, FY - 30, z1], [X, FY - 30, z1], kt, 0.6);
+
+    // Puerta cerrada en la pared derecha, con luz por debajo
+    const kd = seg(0.4, 0.65);
+    const dz0 = zc + 250;
+    const dz1 = zc + 560;
+    const dy = -260;
+    LL([X - 1, FY, dz0], [X - 1, dy, dz0], kd, 1);
+    LL([X - 1, dy, dz0], [X - 1, dy, dz1], kd, 1);
+    LL([X - 1, dy, dz1], [X - 1, FY, dz1], kd, 1);
+    LL([X - 1, -120, dz0 + 40], [X - 1, -120, dz0 + 110], kd, 0.8);
+    const u0 = P(X - 2, FY - 2, dz0 + 10);
+    const u1 = P(X - 2, FY - 2, dz1 - 10);
+    if (u0 && u1 && kd >= 1) {
+      ctx.strokeStyle = `rgba(255, 150, 110, ${(0.55 + 0.1 * Math.sin(now * 0.002)) * fog})`;
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(u0.x, u0.y);
+      ctx.lineTo(u1.x, u1.y);
+      ctx.stroke();
+      ctx.lineWidth = 1;
+    }
+
+    // Cable de la tele serpenteando por el suelo hasta la pared
+    const kc = seg(0.45, 0.75);
+    const c0 = tw([200, FY, bz - 20]);
+    let prevC = c0;
+    for (let k = 1; k <= 24; k++) {
+      const t = k / 24;
+      const pt = [
+        c0[0] + (X - c0[0]) * t,
+        FY,
+        c0[2] + Math.sin(t * Math.PI * 2.5) * 160 + t * 200
+      ];
+      if (k === 24) pt[0] = X - 1;
+      LL(prevC, pt, kc >= t ? 1 : 0, 0.8);
+      prevC = pt;
+    }
+    LL(prevC, [X - 1, FY - 60, prevC[2]], kc >= 1 ? 1 : 0, 0.8);
+
+    // Charco de luz de la pantalla en el suelo
+    const gp = PT([0, FY, fz - 300]);
+    if (gp && on > 0) {
+      const r = 1000 * gp.s;
+      const g = ctx.createRadialGradient(gp.x, gp.y, 0, gp.x, gp.y, r);
+      g.addColorStop(0, `rgba(255, 120, 80, ${0.22 * flick * fog})`);
+      g.addColorStop(1, 'rgba(255, 120, 80, 0)');
+      ctx.fillStyle = g;
+      ctx.beginPath();
+      ctx.ellipse(gp.x, gp.y, r, r * 0.3, 0, 0, TAU);
+      ctx.fill();
+    }
+
+    // Patas
+    const kl = seg(0.3, 0.5);
+    for (const [lx, lz] of [[-250, fz + 40], [250, fz + 40], [-250, bz - 40], [250, bz - 40]]) {
+      LT([lx, ty, lz], [lx * 1.12, FY, lz], kl, B(0.5));
+    }
+
+    // Cuerpo: primero se trazan las aristas; luego las caras, de la más lejana a la más cercana
+    const ke = seg(0.35, 0.7);
+    const kf = seg(0.55, 0.75);
+    const Fc = [[-tx, -ty, fz], [tx, -ty, fz], [tx, ty, fz], [-tx, ty, fz]];
+    const Bc = Fc.map((v) => [v[0] * 0.88, v[1] * 0.88, bz]);
+    if (kf <= 0) {
+      for (let k = 0; k < 4; k++) {
+        LT(Fc[k], Fc[(k + 1) % 4], ke, B(0.75));
+        LT(Bc[k], Bc[(k + 1) % 4], ke, B(0.3));
+        LT(Fc[k], Bc[k], ke, B(0.45));
+      }
+    } else {
+      const faces = [
+        Fc,
+        [Bc[1], Bc[0], Bc[3], Bc[2]],
+        [Fc[0], Fc[1], Bc[1], Bc[0]],
+        [Fc[3], Fc[2], Bc[2], Bc[3]],
+        [Fc[0], Fc[3], Bc[3], Bc[0]],
+        [Fc[1], Fc[2], Bc[2], Bc[1]]
+      ]
+        .map((f3) => {
+          const w = f3.map(tw);
+          return { w, d: w.reduce((t, v) => t + v[2], 0) / 4, front: f3 === Fc };
+        })
+        .sort((x, y) => y.d - x.d);
+      for (const face of faces) {
+        poly(face.w, `rgba(${face.front ? 30 : 22}, ${face.front ? 30 : 22}, ${face.front ? 31 : 23}, ${kf * fog})`, B(face.front ? 0.75 : 0.4));
+      }
+    }
+
+    // Antenas en V con bola en la punta
+    const ka = seg(0.55, 0.78);
+    const base = [0, -ty, 0];
+    for (const tip of [[-280, -600, 0], [250, -620, 0]]) {
+      LT(base, tip, ka, B(0.6));
+      const pt = PT(tip);
+      if (pt && ka >= 1) {
+        ctx.fillStyle = B(0.7);
+        ctx.beginPath();
+        ctx.arc(pt.x, pt.y, Math.max(2, 9 * pt.s), 0, TAU);
+        ctx.fill();
+      }
+    }
+    const pb = PT(base);
+    if (pb && ka > 0) {
+      ctx.strokeStyle = B(0.5);
+      ctx.beginPath();
+      ctx.arc(pb.x, pb.y, 40 * pb.s * ka, Math.PI, TAU);
+      ctx.stroke();
+    }
+
+    // Botones (giran despacio) y rejilla del altavoz
+    const kk = seg(0.6, 0.8);
+    for (const ky of [-120, -20]) {
+      if (kk <= 0) continue;
+      const ring = [];
+      for (let k = 0; k <= 24 * kk; k++) {
+        const a3 = (k / 24) * TAU;
+        ring.push(PT([240 + Math.cos(a3) * 30, ky + Math.sin(a3) * 30, fz - 1]));
+      }
+      if (ring.some((v) => !v)) continue;
+      ctx.strokeStyle = B(0.6);
+      ctx.beginPath();
+      ring.forEach((v, k) => (k ? ctx.lineTo(v.x, v.y) : ctx.moveTo(v.x, v.y)));
+      ctx.stroke();
+      const a4 = now * 0.0005 + ky;
+      LT([240, ky, fz - 1], [240 + Math.cos(a4) * 22, ky + Math.sin(a4) * 22, fz - 1], kk, B(0.6));
+    }
+    for (let y = 70; y <= 190; y += 20) LT([205, y, fz - 1], [275, y, fz - 1], kk, B(0.3));
+
+    // Pantalla
+    const S = [[-280, -190, fz - 2], [160, -190, fz - 2], [160, 190, fz - 2], [-280, 190, fz - 2]];
+    const q = poly(S.map(tw), null, ke > 0.5 ? B(0.6) : null);
+    if (q && on > 0) {
+    const num = reduceMotion ? 86 : Math.min(86, Math.max(0, (el - 2400) / 1300) * 86);
+    paintScreen(on, num, now);
+    ctx.save();
+    ctx.beginPath();
+    q.forEach((v, k) => (k ? ctx.lineTo(v.x, v.y) : ctx.moveTo(v.x, v.y)));
+    ctx.closePath();
+    ctx.clip();
+    const W = tvCanvas.width;
+    const H = tvCanvas.height;
+    ctx.globalAlpha = fog * (0.93 + Math.random() * 0.07);
+    // Afín a partir de tres esquinas: aproximación suficiente con este giro
+    ctx.transform((q[1].x - q[0].x) / W, (q[1].y - q[0].y) / W, (q[3].x - q[0].x) / H, (q[3].y - q[0].y) / H, q[0].x, q[0].y);
+    ctx.drawImage(tvCanvas, 0, 0);
+    ctx.restore();
+    ctx.globalAlpha = 1;
+    }
+
+    // Resplandor de la pantalla: la luz que lo baña todo
+    const sc = PT([-60, 0, fz - 2]);
+    if (sc && on > 0) {
+      ctx.save();
+      ctx.globalCompositeOperation = 'lighter';
+      const r = 520 * sc.s;
+      const g = ctx.createRadialGradient(sc.x, sc.y, r * 0.1, sc.x, sc.y, r);
+      g.addColorStop(0, `rgba(255, 140, 100, ${0.16 * flick * fog})`);
+      g.addColorStop(1, 'rgba(255, 140, 100, 0)');
+      ctx.fillStyle = g;
+      ctx.fillRect(sc.x - r, sc.y - r, r * 2, r * 2);
+      ctx.restore();
+
+      // Polvo suspendido, solo visible dentro del haz
+      for (let k = 0; k < 40; k++) {
+        const ph = k * 12.9898;
+        const v = tw([
+          -60 + Math.sin(ph) * 260 + Math.sin(now * 0.0002 + ph) * 30,
+          Math.cos(ph * 1.7) * 160 + Math.sin(now * 0.00015 + ph) * 40,
+          fz - 80 - ((ph * 37 + now * 0.01) % 500)
+        ]);
+        const p = P(v[0], v[1], v[2]);
+        if (!p) continue;
+        ctx.fillStyle = `rgba(255, 210, 190, ${0.5 * lit(v) * flick * fog})`;
+        ctx.fillRect(p.x, p.y, Math.max(1, 2 * p.s), Math.max(1, 2 * p.s));
+      }
+    }
+
+    // Bombilla apagada colgando del techo, balanceándose
+    const kb = seg(0.5, 0.8);
+    const sw = Math.sin(now * 0.0009) * 40;
+    const top = [0, CY, zc + 350];
+    const bulb = [sw, -380, zc + 350];
+    LL(top, bulb, kb, 1.2);
+    const pbulb = P(bulb[0], bulb[1] + 26, bulb[2]);
+    if (pbulb && kb >= 1) {
+      ctx.fillStyle = `rgba(12, 12, 13, ${fog})`;
+      ctx.strokeStyle = B(Math.min(0.9, 0.2 + lit(bulb) * 1.4 * flick));
+      ctx.beginPath();
+      ctx.ellipse(pbulb.x, pbulb.y, 20 * pbulb.s, 26 * pbulb.s, 0, 0, TAU);
+      ctx.fill();
+      ctx.stroke();
+      ctx.fillRect(pbulb.x - 9 * pbulb.s, pbulb.y - 38 * pbulb.s, 18 * pbulb.s, 14 * pbulb.s);
+      ctx.strokeRect(pbulb.x - 9 * pbulb.s, pbulb.y - 38 * pbulb.s, 18 * pbulb.s, 14 * pbulb.s);
+    }
+
+  }
+
+  // Un mundo distinto por año. P proyecta (x, y, z relativo a la cámara).
+  function drawWorld(c, zc, P, now, fog) {
+    const A = 'rgba(255, 90, 54, ';
+    const B = 'rgba(242, 239, 233, ';
+    ctx.lineWidth = 1;
+
+    if (c.world === 'search') {
+      // Voluntad: una barra de búsqueda que escribe sola lo que yo quiero
+      const p = P(0, -250, zc);
+      if (p) {
+        const w = 560 * p.s;
+        const h = 64 * p.s;
+        ctx.strokeStyle = B + 0.5 * fog + ')';
+        ctx.strokeRect(p.x - w / 2, p.y - h / 2, w, h);
+        const txt = 'lo que yo quiera';
+        const shown = txt.slice(0, Math.floor((now / 140) % (txt.length + 14)));
+        ctx.fillStyle = B + 0.8 * fog + ')';
+        ctx.textAlign = 'left';
+        ctx.font = `400 ${Math.max(9, 22 * p.s)}px ui-monospace, Menlo, monospace`;
+        ctx.fillText(shown + ((now / 450) % 2 < 1 ? '▍' : ''), p.x - w / 2 + 18 * p.s, p.y);
+      }
+      for (const it of c.items) {
+        const q = P(Math.cos(it.a) * it.r, Math.sin(it.a) * it.r * 0.7, zc + it.dz);
+        if (q) paintShape(it.shape, it.size * q.s, q.x, q.y, it.a, B + 0.35 * fog + ')', false);
+      }
+    } else if (c.world === 'orbit') {
+      // Empieza a girar alrededor de ti
+      for (const it of c.items) {
+        const a = it.a + now * 0.00035 * (520 / it.r);
+        const q = P(Math.cos(a) * it.r, Math.sin(a) * it.r * 0.75, zc + it.dz);
+        // Estela: el giro deja rastro
+        const t = P(Math.cos(a - 0.35) * it.r, Math.sin(a - 0.35) * it.r * 0.75, zc + it.dz);
+        if (q && t) {
+          ctx.strokeStyle = (it.hot ? A + 0.35 * fog : B + 0.14 * fog) + ')';
+          ctx.beginPath();
+          ctx.moveTo(t.x, t.y);
+          ctx.lineTo(q.x, q.y);
+          ctx.stroke();
+        }
+        if (q) paintShape(it.shape, it.size * q.s, q.x, q.y, a, (it.hot ? A + 0.55 * fog : B + 0.25 * fog) + ')', false);
+      }
+    } else if (c.world === 'clock') {
+      // Mis horas reales: 24 barras, cuanto más larga más vídeos a esa hora
+      for (let h = 0; h < 24; h++) {
+        const a = (h / 24) * TAU - Math.PI / 2;
+        const r0 = 300;
+        const r1 = r0 + 20 + HOURS[h] * 260;
+        const q0 = P(Math.cos(a) * r0, Math.sin(a) * r0, zc);
+        const q1 = P(Math.cos(a) * r1, Math.sin(a) * r1, zc);
+        if (!q0 || !q1) continue;
+        ctx.strokeStyle = (HOURS[h] > 0.85 ? A + 0.9 * fog : B + 0.35 * fog) + ')';
+        ctx.lineWidth = Math.max(1, 10 * q0.s);
+        ctx.beginPath();
+        ctx.moveTo(q0.x, q0.y);
+        ctx.lineTo(q1.x, q1.y);
+        ctx.stroke();
+        if (h % 6 === 0) {
+          const ql = P(Math.cos(a) * (r0 - 40), Math.sin(a) * (r0 - 40), zc);
+          if (!ql) continue;
+          ctx.fillStyle = B + 0.5 * fog + ')';
+          ctx.textAlign = 'center';
+          ctx.font = `400 ${Math.max(8, 14 * ql.s)}px ui-monospace, Menlo, monospace`;
+          ctx.fillText(String(h).padStart(2, '0') + 'h', ql.x, ql.y);
+        }
+      }
+      ctx.lineWidth = 1;
+    } else if (c.world === 'feed') {
+      // Scroll infinito: columnas de miniaturas que no paran de bajar
+      const off = (now * 0.12) % 190;
+      for (const it of c.items) {
+        const y = it.y - 600 + off;
+        const q = P(it.x, y, zc + 120);
+        if (!q) continue;
+        const w = 240 * q.s;
+        const h = 135 * q.s;
+        const edge = clamp01(1 - Math.abs(y) / 600);
+        const flick = it.hot && Math.sin(now * 0.02 + it.x) > 0.3;
+        ctx.fillStyle = (flick ? A + 0.5 * fog * edge : B + 0.05 * fog * edge) + ')';
+        ctx.fillRect(q.x - w / 2, q.y - h / 2, w, h);
+        ctx.strokeStyle = B + 0.25 * fog * edge + ')';
+        ctx.strokeRect(q.x - w / 2, q.y - h / 2, w, h);
+      }
+    } else if (c.world === 'chain') {
+      // Autoplay: cada vídeo enlaza con el siguiente y un pulso recorre la cadena
+      let prev = null;
+      const pulse = (now * 0.012) % c.items.length;
+      c.items.forEach((it, k) => {
+        const q = P(it.x, it.y, zc + it.dz);
+        if (!q) { prev = null; return; }
+        if (prev) {
+          ctx.strokeStyle = B + 0.3 * fog + ')';
+          ctx.beginPath();
+          ctx.moveTo(prev.x, prev.y);
+          ctx.lineTo(q.x, q.y);
+          ctx.stroke();
+        }
+        const lit = Math.abs(k - pulse) < 2.5;
+        ctx.fillStyle = (lit ? A + 0.95 * fog : B + 0.5 * fog) + ')';
+        const r = (lit ? 9 : 5) * q.s;
+        ctx.fillRect(q.x - r, q.y - r * 0.56, r * 2, r * 1.12);
+        prev = q;
+      });
+    } else if (c.world === 'tunnel') {
+      // Lo que más vi: un túnel de miniaturas que viene hacia ti
+      for (const it of c.items) {
+        const dz = ((it.dz - now * 0.35) % 900 + 900) % 900 - 450;
+        const q = P(Math.cos(it.a) * it.r, Math.sin(it.a) * it.r, zc + dz);
+        if (!q) continue;
+        const w = 90 * q.s;
+        const h = 50 * q.s;
+        const qb = P(Math.cos(it.a) * it.r, Math.sin(it.a) * it.r, zc + dz + 120);
+        if (qb) {
+          ctx.strokeStyle = B + 0.12 * fog + ')';
+          ctx.beginPath();
+          ctx.moveTo(q.x, q.y);
+          ctx.lineTo(qb.x, qb.y);
+          ctx.stroke();
+        }
+        ctx.fillStyle = (it.hot ? A + 0.6 * fog : B + 0.16 * fog) + ')';
+        ctx.fillRect(q.x - w / 2, q.y - h / 2, w, h);
+      }
+    } else if (c.world === 'tv') {
+      drawTV(zc, P, now, fog);
+    } else if (c.world === 'vortex') {
+      // 223 vídeos en un día: un remolino que te traga, ya pixelado
+      const grid = 6;
+      for (const it of c.items) {
+        const a = it.a + now * 0.0009 * it.sp * (300 / it.r);
+        const r = it.r * (0.85 + 0.15 * Math.sin(now * 0.001 + it.a));
+        const q = P(Math.cos(a) * r, Math.sin(a) * r, zc + it.dz);
+        if (!q) continue;
+        const sz = Math.max(grid, Math.round((8 * q.s) / grid) * grid);
+        ctx.fillStyle = (it.sp > 1.15 ? B + 0.5 * fog : A + 0.7 * fog) + ')';
+        ctx.fillRect(Math.round(q.x / grid) * grid, Math.round(q.y / grid) * grid, sz, sz);
+      }
+    }
+  }
+
   function renderRoom(now) {
     if (room.snapPending && performance.now() - room.lastInput > 450) {
       room.tz = Math.max(0, Math.min(ROOM_MAX_Z, Math.round(room.tz / CHAPTER_GAP) * CHAPTER_GAP));
@@ -837,6 +1543,13 @@
       0,
       Math.min(room.chapters.length - 1, Math.round(room.z / CHAPTER_GAP))
     );
+
+    if (chapterIndex !== room.railIndex) showCard(chapterIndex);
+    cardMix += (1 - cardMix) * 0.04;
+    if (teleZ) {
+      teleZ.textContent = 'PROFUNDIDAD ' + String(Math.round(room.z)).padStart(4, '0');
+      teleHead.textContent = 'TU CONTROL ' + String(Math.round((room.ctrl ?? 1) * 100)).padStart(3, '0') + '%';
+    }
 
     if (yearsEl && chapterIndex !== room.railIndex) {
       room.railIndex = chapterIndex;
@@ -849,12 +1562,24 @@
 
     const gyroLook = gyroOn && gyroPrev && now >= touchLookUntil;
 
-    if (gyroLook) {
-      room.tyaw = gyroYaw;
-      room.tpitch = gyroPitch;
-    } else {
-      room.tyaw = (pointer.tx / vw - 0.5) * 0.6;
-      room.tpitch = (pointer.ty / vh - 0.5) * 0.4;
+    // Cuanto más manda el algoritmo, menos manda el ratón: la cámara deriva sola
+    const fz = Math.min(DATA.length - 2, room.z / CHAPTER_GAP);
+    const i0 = Math.floor(fz);
+    const aNow = (DATA[i0].algo + (DATA[Math.min(i0 + 1, DATA.length - 2)].algo - DATA[i0].algo) * (fz - i0)) / 100;
+    room.ctrl = clamp01(1 - ((aNow - 0.58) / 0.28) * 0.85);
+    // Sentado frente a la tele, la cámara se calma
+    const drift = reduceMotion ? 0 : (1 - room.ctrl) * (room.verdictAt ? 0.3 : 1);
+    const dYaw = Math.sin(now * 0.00031) * 0.26 + Math.sin(now * 0.00077) * 0.06;
+    const dPitch = Math.cos(now * 0.00023) * 0.13;
+    const baseYaw = gyroLook ? gyroYaw : (pointer.tx / vw - 0.5) * 0.6;
+    const basePitch = gyroLook ? gyroPitch : (pointer.ty / vh - 0.5) * 0.4;
+    room.tyaw = baseYaw * room.ctrl + dYaw * drift;
+    room.tpitch = basePitch * room.ctrl + dPitch * drift;
+    const roll = Math.sin(now * 0.00033) * 0.05 * drift;
+    if (audio && audio.filter && soundOn) {
+      const t = audio.ctx.currentTime;
+      audio.filter.frequency.setTargetAtTime(320 + drift * 900, t, 0.4);
+      audio.noiseGain.gain.setTargetAtTime(0.018 + drift * 0.05, t, 0.4);
     }
 
     const lookEase = gyroLook ? 0.05 : 0.08;
@@ -880,6 +1605,29 @@
     glow.addColorStop(1, 'rgba(255, 90, 54, 0)');
     ctx.fillStyle = glow;
     ctx.fillRect(0, 0, vw, vh);
+
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.rotate(roll);
+    ctx.translate(-cx, -cy);
+
+    const P = (x, y, z) => {
+      const x1 = x * cyaw - z * syaw;
+      const z1 = x * syaw + z * cyaw;
+      const y1 = y * cp - z1 * sp;
+      const z2 = y * sp + z1 * cp;
+      if (z2 < 40 || z2 > ROOM_DEPTH) return null;
+      const s = focal / z2;
+      return { x: cx + x1 * s, y: cy + y1 * s, s, z: z2 };
+    };
+
+    for (let i = room.chapters.length - 1; i >= 0; i--) {
+      const c = room.chapters[i];
+      const zc = c.z - room.z;
+      if (zc < -500 || zc > ROOM_DEPTH) continue;
+      drawWorld(c, zc, P, now, clamp01(1 - Math.abs(zc - 600) / 750));
+      if (i === room.railIndex && Math.abs(zc - 600) < 200) worldSound(c, now);
+    }
 
     for (const p of room.pts) {
       let z = p.z - room.z;
@@ -916,6 +1664,7 @@
 
     for (let i = room.chapters.length - 1; i >= 0; i--) {
       const c = room.chapters[i];
+      if (c.verdict) continue;
       const z = c.z - room.z;
       if (z < 60 || z > ROOM_DEPTH) continue;
 
@@ -937,10 +1686,17 @@
 
       // Aro de paso: se agranda y lo atraviesas
       ctx.globalAlpha = Math.max(0.06, fog) * (0.35 + 0.65 * near);
-      ctx.strokeStyle = current ? 'rgba(255, 90, 54, 0.5)' : 'rgba(242, 239, 233, 0.16)';
+      ctx.strokeStyle = current ? 'rgba(242, 239, 233, 0.28)' : 'rgba(242, 239, 233, 0.16)';
       ctx.lineWidth = 1;
       ctx.beginPath();
       ctx.arc(sx, sy, 240 * s, 0, TAU);
+      ctx.stroke();
+
+      // Arco del algoritmo: la parte del año que no elegí
+      ctx.strokeStyle = 'rgba(255, 90, 54, 0.9)';
+      ctx.lineWidth = Math.max(1.5, Math.min(6, 2.2 * s));
+      ctx.beginPath();
+      ctx.arc(sx, sy, 240 * s, -Math.PI / 2, -Math.PI / 2 + TAU * c.algo * (current ? cardMix : 1));
       ctx.stroke();
 
       // Año en contorno: no tapa el fondo ni se vuelve un muro blanco
@@ -950,26 +1706,10 @@
       ctx.lineWidth = Math.max(0.8, Math.min(2, 0.5 * s));
       ctx.font = `400 ${fs}px Helvetica, "Helvetica Neue", Arial, sans-serif`;
       ctx.strokeText(String(c.year), sx, sy);
-
-      const dfs = Math.max(10, Math.min(30, 14 * s));
-      ctx.globalAlpha = Math.max(0.05, fog) * near;
-      ctx.textAlign = 'left';
-      ctx.font = `400 ${dfs}px Helvetica, "Helvetica Neue", Arial, sans-serif`;
-      ctx.fillStyle = 'rgba(242, 239, 233, 0.55)';
-
-      for (const d of c.labels) {
-        const lx1 = d.dx * cyaw - z * syaw;
-        const lz1 = d.dx * syaw + z * cyaw;
-        const ly1 = d.dy * cp - lz1 * sp;
-        const lz2 = d.dy * sp + lz1 * cp;
-        if (lz2 < 60) continue;
-
-        const ls = focal / lz2;
-        ctx.fillText(d.name + ' —', cx + lx1 * ls + 8, cy + ly1 * ls);
-      }
     }
 
     ctx.globalAlpha = 1;
+    ctx.restore();
   }
 
   function frame(now) {
@@ -1118,11 +1858,46 @@
     for (const b of blobs) if (!b.pupil) drawBlob(b, now, eyeMix, playMix);
     for (const b of blobs) if (b.pupil) drawBlob(b, now, eyeMix, playMix);
 
+    updateHud(now, eyeMix, playMix);
+
     if (cursorEl && pointer.seen) {
       cursorEl.style.transform = `translate3d(${pointer.tx}px, ${pointer.ty}px, 0)`;
     }
 
     requestAnimationFrame(frame);
+  }
+
+  const HUD_PANELS = ['PORTADA', 'PREGUNTA', 'ENTRADA'];
+
+  function updateHud(now, eyeMix, playMix) {
+    if (!hud.gaze) return;
+    const sign = (v) => (v < 0 ? '−' : '+') + Math.abs(v).toFixed(1).padStart(5, '0');
+    const gx = ((pointer.x / vw) - 0.5) * 200;
+    const gy = (0.5 - (pointer.y / vh)) * 200;
+    const status = intro.active ? 'ADQUIRIENDO'
+      : playMix > 0.8 ? 'ESPERANDO ORDEN'
+      : eyeMix > 0.8 ? 'TE OBSERVA'
+      : 'OBSERVANDO';
+    const pi = Math.min(2, Math.round(smoothP * 2));
+    // Los registros se cargan durante la entrada
+    const loaded = intro.active ? Math.round(60850 * smooth((now - intro.start) / INTRO_END)) : 60850;
+    const key = status + pi + loaded + Math.round(gx * 10) + Math.round(gy * 10);
+    hud.ticks.style.setProperty('--p', smoothP.toFixed(3));
+    if (key === hud.last) return;
+    hud.last = key;
+    hud.gaze.textContent = 'MIRADA X ' + sign(gx) + ' / Y ' + sign(gy);
+    hud.status.textContent = status;
+    hud.count.textContent = 'REGISTROS ' + fmt(loaded);
+    hud.panel.textContent = '[0' + (pi + 1) + ' / 03]';
+    hud.panelName.textContent = HUD_PANELS[pi];
+  }
+
+  if (hud.clock) {
+    const tick = () => {
+      hud.clock.textContent = new Date().toLocaleTimeString('es-ES', { hour12: false }) + ' CET';
+    };
+    tick();
+    setInterval(tick, 1000);
   }
 
   function makeFilm() {
@@ -1208,7 +1983,8 @@
     noiseGain.connect(master);
     noise.start();
 
-    return { ctx: a, master, chimeBus };
+    // filter y noiseGain se exponen para que la sala los tense año a año
+    return { ctx: a, master, chimeBus, filter, noiseGain };
   }
 
   function chime(freq) {
@@ -1227,6 +2003,44 @@
     gain.connect(audio.chimeBus);
     osc.start(t);
     osc.stop(t + 1.2);
+  }
+
+  // Sonido corto para los mundos de la sala
+  function blip(freq, dur, type = 'sine', vol = 0.05, slideTo = 0) {
+    if (!audio || !soundOn) return;
+    const a = audio.ctx;
+    const t = a.currentTime;
+    const osc = a.createOscillator();
+    const gain = a.createGain();
+    osc.type = type;
+    osc.frequency.setValueAtTime(freq, t);
+    if (slideTo) osc.frequency.exponentialRampToValueAtTime(slideTo, t + dur);
+    gain.gain.setValueAtTime(0.0001, t);
+    gain.gain.exponentialRampToValueAtTime(vol, t + 0.008);
+    gain.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    osc.connect(gain);
+    gain.connect(audio.chimeBus);
+    osc.start(t);
+    osc.stop(t + dur + 0.05);
+  }
+
+  // Un ritmo propio por mundo: cada año suena distinto y más nervioso
+  function worldSound(c, now) {
+    const beat = (ms) => {
+      const k = Math.floor(now / ms);
+      if (k === c.lastBeat) return false;
+      c.lastBeat = k;
+      return true;
+    };
+    switch (c.world) {
+      case 'search': if (beat(140) && (now / 140) % 30 < 16) blip(1900, 0.025, 'square', 0.012); break;
+      case 'orbit': if (beat(1100)) blip([392, 440, 523, 587][Math.floor(now / 1100) % 4], 0.9, 'sine', 0.035); break;
+      case 'clock': if (beat(500)) blip(Math.floor(now / 500) % 2 ? 1400 : 1000, 0.03, 'triangle', 0.025); break;
+      case 'feed': if (beat(1583)) blip(260, 0.12, 'triangle', 0.04, 140); break;
+      case 'chain': if (beat(83)) { const k = Math.floor(now * 0.012) % c.items.length; if (k % 4 === 0) blip(300 + k * 14, 0.08, 'sine', 0.03); } break;
+      case 'tunnel': if (beat(420)) blip(110, 0.35, 'sawtooth', 0.03, 45); break;
+      case 'vortex': if (beat(90) && Math.random() < 0.6) blip(200 + Math.random() * 1800, 0.035, 'square', 0.014); break;
+    }
   }
 
   function winkSound() {

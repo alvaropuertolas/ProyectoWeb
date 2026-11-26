@@ -29,6 +29,42 @@ Reglas:
 
 ---
 
+## 2026-11-26 — Sin silla y "?" sin cortar
+- **Cambios:** quitada la silla de la sala del veredicto. "¿Y tú, cuántos eliges?" con margen a la derecha para que la cursiva no corte la "?".
+- **Motivo:** el usuario ve la silla fuera de lugar y la interrogación cortada.
+- **Verificación:** Safari escritorio: sin silla y el texto acaba 7 px dentro de su caja.
+
+## 2026-11-26 — Sala del veredicto oscura y con detalle
+- **Cambios:** la sala final pasa a estar a oscuras: un velo negro cubre todo y la única luz es la pantalla, que parpadea; cada línea (dividida en tramos) se ilumina según su distancia a la tele y se apaga hacia el negro. Detalle nuevo: suelo de baldosas, paredes alicatadas con zócalo, puerta cerrada con una raya de luz por debajo, cable de la tele por el suelo, bombilla apagada que se balancea, polvo visible solo en el haz de la pantalla, resplandor sobre la tele y una silla vacía de espaldas con correas en los brazos (el espectador).
+- **Motivo:** el usuario ve la sala básica y la quiere oscura, tipo sala de interrogatorio, aprovechando el brillo de la pantalla.
+- **Verificación:** Safari escritorio, estado final a 6 s, 60 fps, sin errores en consola. Sin probar en móvil real ni con sonido.
+
+## 2026-11-26 — Veredicto en una sala con TV antigua
+- **Cambios:** el veredicto deja de ser una pantalla blanca. Al llegar a "fin" se construye, línea a línea, una sala virtual (suelo en rejilla, paredes, techo) con una TV antigua en 3D en el centro: cuerpo macizo con caras ordenadas por profundidad, antenas en V, botones que giran, rejilla de altavoz y patas. La TV se enciende con la raya típica de tele antigua y la pantalla muestra el 86 % contando, la cuadrícula 10 × 10 y la frase en Kuronuri 100, con líneas de barrido, estática, viñeta y saltos de imagen; su luz tiñe el suelo. Sonido de encendido (chasquido, pitido y estática). La cámara se calma frente a la tele. Las cifras y "¿Y tú, cuántos eliges?" entran al final, abajo. Quitados el número, la línea y la cuadrícula en HTML.
+- **Motivo:** el usuario ve el final de sopetón y propone una sala virtual con una TV antigua que muestre el resultado.
+- **Verificación:** Safari escritorio: construcción a 1,4 s y estado final a 6 s, sin errores en consola. Sin probar en móvil real ni con sonido.
+
+## 2026-11-26 — Sala más suave, sonido por mundo y veredicto con cuadrícula
+- **Cambios:** deriva y giro de la cámara reducidos a la mitad (mareaban). Quitada la nota "reconstruido" de la ficha (2019–2022 siguen siendo estimaciones; queda documentado en el código y en este log). Icono de sonido apagado recentrado (1,75 px). Cada mundo de la sala tiene su sonido (teclas, notas en órbita, tic-tac, scroll, autoplay, túnel, glitch), cada año entra con una nota más grave y el veredicto con un golpe grave tras bajar el pad. El veredicto añade una cuadrícula 10 × 10 que se llena de naranja hasta 86 y la pregunta "¿Y tú, cuántos eliges?". Portada: la tesis "La batalla por mi atención." pasa a ser el titular (`h1`, Kuronuri) y el nombre queda como firma; la entrada sigue formando "alvaropuertolas" con manchas, centrado y dibujado por su cuenta.
+- **Motivo:** peticiones del usuario: menos mareo, que parezca real, icono centrado, que el sonido haga algo en la sala y un final menos aburrido; quitar protagonismo al nombre (opción elegida: tesis grande, nombre firma).
+- **Verificación:** Safari escritorio: veredicto y cuadrícula (86 casillas), sin errores en consola. Sonido no escuchado (la sesión no tiene audio).
+
+## 2026-11-26 — Un mundo por año y pérdida de control
+- **Cambios:** cada año de la sala tiene su propio mundo 3D: 2019 barra de búsqueda que escribe "lo que yo quiera"; 2020 órbita con estelas; 2021 reloj de 24 barras con las horas reales de consumo; 2022 feed de miniaturas en scroll infinito con anuncios que parpadean; 2023 cadena de autoplay con un pulso; 2024 túnel de miniaturas hacia la cámara; 2025 remolino pixelado de 223 vídeos. La cámara pierde control con el % de algoritmo (100 % en 2019 → 15 % en 2025): deriva y se inclina sola; la telemetría muestra "TU CONTROL". Con sonido, el pad se abre y el ruido sube a la par. Datos con un mismo hilo en todos los años: vídeos, búsquedas y vídeos por búsqueda (1,6 → 5,6); fuera los comentarios. Icono de sonido centrado en ambos estados.
+- **Motivo:** el usuario ve la sala repetitiva y pide que cada año se sienta distinto y que todos los datos apunten a que el algoritmo controla lo que ve.
+- **Verificación:** Safari escritorio, los 7 años y el veredicto; centrado del icono medido (0 px de desvío horizontal). Sin probar en móvil real ni el sonido.
+
+## 2026-11-26 — Kuronuri, veredicto y menos redundancia
+- **Cambios:** serif cambiada a Kuronuri (OFL, lihbr; subconjunto latino en `fonts/`, licencia en `fonts/OFL-Kuronuri.txt`). La frase de cada año se pixela más cuanto más manda el algoritmo (niveles 0 → 100) y "me sirve en bandeja" ya sale degradada. Nuevo capítulo final "fin": la pantalla se invierte y responde a la pregunta del home con un 86 % gigante. Texto que se descifra al entrar en pantalla y al pasar por los años del raíl. Quitados duplicados: título del HUD, "capítulo 01 / 07", "[01 / 07]", registros y fuente repetidos; el gancho del home pasa a ser una pregunta ("39.839 vídeos. ¿Cuántos elegí yo?").
+- **Motivo:** el usuario pide Kuronuri, menos redundancia y algo que le falta a la web (comparada con la de un compañero): faltaba variedad de mecánicas y un momento de revelación.
+- **Verificación:** Safari escritorio: fuentes cargadas, 2025 pixelado, veredicto con 86 %, portada y pregunta. Sin probar en móvil real.
+
+## 2026-11-26 — HUD de telemetría y datos reales por año
+- **Cambios:** HUD en mono en las cuatro esquinas del home (reloj, mirada del cursor, estado, registros que se cargan en la entrada, panel actual y regla de progreso). Serif italic (Newsreader, Google Fonts) para la pregunta y el subtítulo; ficha "Muestra Nº 001" bajo el nombre; cifra gancho "≈ 9 / 10" en la pregunta. En la sala, cada año tiene ficha con frase, tres cifras que cuentan hacia arriba y barra algoritmo/voluntad; el aro del año se pinta en naranja según el % de algoritmo y la nube de cada año es más naranja cuanto más manda el algoritmo. Telemetría de profundidad y rumbo.
+- **Datos:** Google Takeout de YouTube, agregados (sin títulos ni búsquedas). "Algoritmo" = reproducción sin búsqueda en los 2 min previos: 79 % (2023, jul–dic), 83 % (2024), 86 % (2025). Comentarios por año y anuncios de 2022 son reales. 2019–2022 no tienen historial de reproducciones: vídeos, horas y % se reconstruyen con la tendencia y la ficha lo marca ("≈ reconstruido").
+- **Motivo:** pedido del usuario: web menos sosa con referentes onegrain.world y mf.avqor.studio, y datos orientados a cómo el algoritmo controla lo que ve.
+- **Verificación:** abierto en Safari (escritorio y 390 px): entrada, HUD, sala, ficha de 2019 y 2025. Sin probar en móvil real.
+
 ## 2026-11-24 — Fichas del loop
 - **Cambios:** añadida la carpeta `fichas/` con una ficha por scroll (portada, pregunta y play/sala). Cada ficha recoge qué se pidió, qué se obtuvo, cómo se verificó, dónde decido yo y quién verifica.
 - **Motivo:** entrega pedida por el profesor.

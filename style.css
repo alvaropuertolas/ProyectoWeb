@@ -1,7 +1,16 @@
+/* Kuronuri (OFL, lihbr): serif de redacción; el número es el nivel de pixelado */
+@font-face { font-family: "Kuronuri 0"; font-style: italic; font-display: swap; src: url("fonts/kuronuri-0-latin-400-italic.woff2?v=1") format("woff2"); }
+@font-face { font-family: "Kuronuri 20"; font-style: italic; font-display: swap; src: url("fonts/kuronuri-20-latin-400-italic.woff2?v=1") format("woff2"); }
+@font-face { font-family: "Kuronuri 50"; font-style: italic; font-display: swap; src: url("fonts/kuronuri-50-latin-400-italic.woff2?v=1") format("woff2"); }
+@font-face { font-family: "Kuronuri 100"; font-style: italic; font-display: swap; src: url("fonts/kuronuri-100-latin-400-italic.woff2?v=1") format("woff2"); }
+
 :root {
   --bg: #141415;
   --ink: #f2efe9;
   --accent: #ff5a36;
+  --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  --serif: "Kuronuri 0", Georgia, "Times New Roman", serif;
+  --dim: rgba(242, 239, 233, 0.5);
 }
 
 * {
@@ -88,13 +97,22 @@ body.is-intro .panel--cover .panel-inner {
   letter-spacing: 0;
 }
 
+/* La tesis es el titular; el nombre pasa a firma */
 h1 {
   margin: 0;
-  font-size: clamp(2.5rem, 15vw, 17rem);
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: clamp(3rem, 10.5vw, 11.5rem);
   font-weight: 400;
-  line-height: 0.85;
-  letter-spacing: -0.07em;
-  white-space: nowrap;
+  line-height: 0.9;
+  letter-spacing: -0.03em;
+}
+
+.byline {
+  margin: 0;
+  font-size: clamp(1.6rem, 3.4vw, 3.2rem);
+  line-height: 1;
+  letter-spacing: -0.06em;
 }
 
 .question {
@@ -108,7 +126,10 @@ h1 {
 }
 
 .question em {
-  font-style: normal;
+  font-family: var(--serif);
+  font-style: italic;
+  font-weight: 400;
+  letter-spacing: -0.02em;
   color: var(--accent);
 }
 
@@ -198,6 +219,7 @@ body.room-mode main {
 }
 
 .room__bar {
+  position: relative;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -395,7 +417,13 @@ html.cursor-hidden * {
   width: 22px;
   height: 22px;
   color: rgba(242, 239, 233, 0.6);
-  transition: color 0.3s ease;
+  /* Sin ondas, el altavoz (x 4–14 de 24) queda a la izquierda: se recentra */
+  transform: translateX(1.75px);
+  transition: color 0.3s ease, transform 0.25s ease;
+}
+
+.sound.is-on .sound__icon {
+  transform: translateX(0.2px);
 }
 
 .sound:hover .sound__icon,
@@ -424,7 +452,7 @@ html.cursor-hidden * {
 
 @media (max-width: 360px) {
   h1 {
-    font-size: 13.5vw;
+    font-size: 12vw;
   }
 
   .kicker {
@@ -453,4 +481,397 @@ html.cursor-hidden * {
   .room {
     transition: none;
   }
+}
+
+/* ——— HUD de telemetría ——— */
+.hud {
+  position: fixed;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  font-family: var(--mono);
+  font-size: 0.62rem;
+  line-height: 1.7;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--dim);
+  transition: opacity 0.6s ease;
+}
+
+body.room-mode .hud {
+  opacity: 0;
+}
+
+.hud b {
+  font-weight: 400;
+  color: var(--ink);
+}
+
+.hud .hud__accent {
+  color: var(--accent);
+}
+
+.hud__c {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  font-variant-numeric: tabular-nums;
+}
+
+.hud__c--tl { top: calc(22px + env(safe-area-inset-top, 0px)); left: calc(22px + env(safe-area-inset-left, 0px)); }
+.hud__c--tr { top: calc(22px + env(safe-area-inset-top, 0px)); right: calc(86px + env(safe-area-inset-right, 0px)); text-align: right; }
+.hud__c--bl { bottom: calc(22px + env(safe-area-inset-bottom, 0px)); left: calc(22px + env(safe-area-inset-left, 0px)); }
+.hud__c--br { bottom: calc(22px + env(safe-area-inset-bottom, 0px)); right: calc(22px + env(safe-area-inset-right, 0px)); text-align: right; }
+
+/* Marcas de esquina, como un visor */
+.hud::before,
+.hud::after {
+  content: "";
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  border: 1px solid rgba(242, 239, 233, 0.3);
+}
+
+.hud::before {
+  top: calc(10px + env(safe-area-inset-top, 0px));
+  left: calc(10px + env(safe-area-inset-left, 0px));
+  border-right: 0;
+  border-bottom: 0;
+}
+
+.hud::after {
+  bottom: calc(10px + env(safe-area-inset-bottom, 0px));
+  right: calc(10px + env(safe-area-inset-right, 0px));
+  border-left: 0;
+  border-top: 0;
+}
+
+/* Regla vertical con el progreso del scroll */
+.hud__ticks {
+  position: absolute;
+  top: 50%;
+  left: calc(22px + env(safe-area-inset-left, 0px));
+  width: 8px;
+  height: 30vh;
+  transform: translateY(-50%);
+  background: repeating-linear-gradient(to bottom, rgba(242, 239, 233, 0.28) 0 1px, transparent 1px 10px);
+}
+
+.hud__ticks::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: calc(var(--p, 0) * 100%);
+  width: 16px;
+  height: 1px;
+  background: var(--accent);
+}
+
+/* ——— Portada: cierre bajo el nombre ——— */
+.cover-foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+  margin-top: clamp(22px, 4vh, 44px);
+  padding-top: 16px;
+  border-top: 1px solid rgba(242, 239, 233, 0.16);
+}
+
+.serif {
+  margin: 0;
+  font-family: var(--serif);
+  font-style: italic;
+  font-weight: 400;
+  font-size: clamp(1.5rem, 3.2vw, 3rem);
+  letter-spacing: -0.02em;
+  line-height: 1;
+}
+
+.sample {
+  display: grid;
+  grid-template-columns: auto auto;
+  gap: 3px 22px;
+  margin: 0;
+  font-family: var(--mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.sample dt {
+  color: var(--dim);
+}
+
+.sample dd {
+  margin: 0;
+  text-align: right;
+}
+
+.sample dt:first-child,
+.sample dt:first-child + dd {
+  color: var(--accent);
+}
+
+/* ——— Pregunta: gancho que se responde en el veredicto ——— */
+.tease {
+  margin: clamp(26px, 5vh, 48px) 0 0;
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--dim);
+}
+
+
+/* ——— Sala: ficha del capítulo ——— */
+.card {
+  position: absolute;
+  left: calc(clamp(20px, 3.5vw, 48px) + env(safe-area-inset-left, 0px));
+  bottom: calc(clamp(64px, 9vh, 96px) + env(safe-area-inset-bottom, 0px));
+  width: min(380px, calc(100vw - 96px));
+  padding: 18px 20px 16px;
+  border: 1px solid rgba(242, 239, 233, 0.14);
+  background: rgba(20, 20, 21, 0.55);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  transition: opacity 0.35s ease, transform 0.35s ease;
+}
+
+.card.is-swapping {
+  opacity: 0;
+  transform: translateY(8px);
+}
+
+.card__note,
+.card__stats,
+.split__legend,
+.room__tele {
+  font-family: var(--mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-variant-numeric: tabular-nums;
+}
+
+.card__year {
+  margin: 2px 0 6px;
+  font-size: clamp(2.6rem, 5vw, 3.6rem);
+  font-weight: 400;
+  line-height: 1;
+  letter-spacing: -0.05em;
+}
+
+.card__beat {
+  margin: 0 0 14px;
+  font-family: var(--serif);
+  font-style: italic;
+  font-weight: 400;
+  font-size: 1.3rem;
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+}
+
+.card__stats {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 0;
+  margin: 0 0 14px;
+}
+
+.card__stats dt,
+.card__stats dd {
+  padding: 6px 0;
+  border-top: 1px solid rgba(242, 239, 233, 0.1);
+}
+
+.card__stats dt {
+  color: var(--dim);
+}
+
+.card__stats dd {
+  margin: 0;
+  text-align: right;
+  font-size: 0.85rem;
+  color: var(--ink);
+}
+
+.split__bar {
+  height: 6px;
+  background: rgba(242, 239, 233, 0.18);
+}
+
+.split__algo {
+  display: block;
+  height: 100%;
+  width: 0;
+  background: var(--accent);
+  transition: width 1.1s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.split__legend {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 6px;
+  color: var(--dim);
+}
+
+.split__legend span:first-child b {
+  color: var(--accent);
+  font-weight: 400;
+}
+
+.split__legend b {
+  color: var(--ink);
+  font-weight: 400;
+}
+
+.card__note {
+  margin: 12px 0 0;
+  color: var(--dim);
+}
+
+.card__note:empty {
+  display: none;
+}
+
+.room__tele {
+  position: absolute;
+  right: calc(clamp(20px, 3.5vw, 48px) + env(safe-area-inset-right, 0px));
+  bottom: calc(clamp(26px, 4vh, 40px) + env(safe-area-inset-bottom, 0px));
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  color: var(--dim);
+}
+
+@media (max-width: 640px) {
+  .hud__c--tr span:last-child,
+  .hud__c--bl span:last-child,
+  .hud__ticks,
+  .room__tele {
+    display: none;
+  }
+
+  .hud__c--tr {
+    right: calc(78px + env(safe-area-inset-right, 0px));
+  }
+
+  .sample {
+    display: none;
+  }
+
+  .card {
+    bottom: calc(56px + env(safe-area-inset-bottom, 0px));
+    width: calc(100vw - 80px);
+    padding: 14px 16px 12px;
+  }
+
+  .card__year {
+    font-size: 2.2rem;
+  }
+
+  .card__beat {
+    font-size: 1.05rem;
+    margin-bottom: 10px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card,
+  .split__algo {
+    transition: none;
+  }
+}
+
+/* La frase de cada año se degrada: la letra se va tachando */
+.card__beat[data-level="20"] { font-family: "Kuronuri 20", var(--serif); }
+.card__beat[data-level="50"] { font-family: "Kuronuri 50", var(--serif); }
+.card__beat[data-level="100"] { font-family: "Kuronuri 100", var(--serif); }
+
+/* Veredicto: la TV se dibuja en el canvas; aquí solo el pie, que entra al final */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.verdict {
+  position: absolute;
+  left: calc(clamp(20px, 3.5vw, 48px) + env(safe-area-inset-left, 0px));
+  right: calc(clamp(20px, 3.5vw, 48px) + env(safe-area-inset-right, 0px));
+  bottom: calc(clamp(22px, 4vh, 40px) + env(safe-area-inset-bottom, 0px));
+  z-index: 1;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px 40px;
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.verdict.is-on {
+  opacity: 1;
+  transform: none;
+  transition: opacity 0.9s ease 3.4s, transform 0.9s ease 3.4s;
+}
+
+.verdict__foot {
+  display: grid;
+  grid-template-columns: auto auto;
+  gap: 3px 24px;
+  margin: 0;
+  font-family: var(--mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--dim);
+}
+
+.verdict__foot dd {
+  margin: 0;
+  color: var(--ink);
+}
+
+.verdict__ask {
+  margin: 0;
+  /* La cursiva sobresale de su caja: sin este aire, la "?" se corta */
+  padding: 0 0.2em 0.1em 0;
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: clamp(1.4rem, 2.6vw, 2.3rem);
+  color: var(--accent);
+}
+
+/* En el veredicto sobran la ficha, la pista y la telemetría */
+.room.is-verdict .card,
+.room.is-verdict .room__hint,
+.room.is-verdict .room__tele {
+  opacity: 0;
+}
+
+.room__bar,
+.room__years,
+.room__hint,
+.room__tele {
+  z-index: 2;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .verdict {
+    transition: none;
+  }
+}
+
+/* Lo que sirve el algoritmo ya llega algo degradado */
+.question em:last-of-type {
+  font-family: "Kuronuri 50", var(--serif);
 }

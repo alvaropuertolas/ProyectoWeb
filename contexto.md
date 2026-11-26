@@ -8,10 +8,10 @@ Página web de un proyecto académico de Elisava. Una sola página con HTML, CSS
 
 ## Contenido actual
 - **Home:** tres secciones apiladas con scroll vertical nativo y ajuste magnético por pantalla (portada, pregunta y play).
-- **Sección 1:** "alvaropuertolas" a gran escala y "Algoritmo vs Voluntad" como kicker naranja.
+- **Sección 1:** la tesis "La batalla por mi atención." como titular en Kuronuri, "Algoritmo vs Voluntad" como kicker naranja y el nombre como firma, con la ficha "Muestra Nº 001".
 - **Sección 2:** la pregunta "¿Consumo lo que yo decido buscar o lo que la página de inicio me sirve en bandeja?".
 - **Sección 3:** las manchas forman un play, con un botón de pista "click"; no se puede pasar de ahí con scroll.
-- **Sala de datos:** al pulsar el play, tras el warp, se entra en una sala 3D a pantalla completa organizada en capítulos por año (2019–2025). Cada año tiene su etiqueta y tres datos placeholder (horas, vídeos, canales); un raíl lateral permite saltar de año y la cámara se imanta al capítulo al parar. El ratón gira la cámara, la rueda o el arrastre avanzan; "volver" y `Esc` salen. En móvil, al pulsar el play se pide permiso de movimiento (iOS exige un gesto); si se acepta, la vista sigue la inclinación, y el arrastre táctil sigue disponible siempre: mientras arrastras, el dedo manda sobre el giroscopio. Está en construcción.
+- **Sala de datos:** al pulsar el play, tras el warp, se entra en una sala 3D a pantalla completa organizada en capítulos por año (2019–2025). Cada año tiene su propio mundo 3D (búsqueda, órbita, reloj de horas, feed, cadena de autoplay, túnel, remolino) y una ficha con frase, vídeos, búsquedas, vídeos por búsqueda y barra algoritmo/voluntad (2019–2022 reconstruidos). La cámara pierde control según el % de algoritmo; al final se construye una sala virtual a oscuras, iluminada solo por una TV antigua en 3D que enseña el veredicto (86 % y cuadrícula), con bombilla, puerta y azulejos; un raíl lateral permite saltar de año y la cámara se imanta al capítulo al parar. El ratón gira la cámara, la rueda o el arrastre avanzan; "volver" y `Esc` salen. En móvil, al pulsar el play se pide permiso de movimiento (iOS exige un gesto); si se acepta, la vista sigue la inclinación, y el arrastre táctil sigue disponible siempre: mientras arrastras, el dedo manda sobre el giroscopio. Está en construcción.
 - **Móvil:** `viewport-fit=cover` y safe areas para ocupar toda la pantalla sin que la cabecera, el raíl o la pista queden bajo el notch o la barra de Safari.
 - **Entrada:** al cargar, las manchas forman el nombre, se disuelven y aparece el contenido; se puede saltar con cualquier gesto.
 - **Animación e interacción:** manchas grises irregulares en canvas, con rejilla, manchas grandes, contornos y cruces; forman un ojo con iris, pupila naranja y anillos. El ojo sigue el cursor y parpadea; las manchas cercanas orbitan el puntero; un clic sobre el ojo provoca un parpadeo con sonido. El fondo tiene parallax y grano de película. El cursor nativo se oculta con ratón y queda solo el anillo propio, que crece sobre el botón de sonido.
@@ -21,6 +21,7 @@ Página web de un proyecto académico de Elisava. Una sola página con HTML, CSS
 - `index.html`: canvas de fondo, cursor, botón de sonido, tres secciones apiladas y la sala de datos.
 - `style.css`: estilos. Diseño oscuro: fondo `#141415`, Helvetica, acento naranja `#ff5a36`, tipografía a gran escala, grano, cursor tipo lente, control de sonido y sala de datos.
 - `script.js`: motor de canvas (entrada con el nombre, ojo con mirada y parpadeo, play, parallax, sala 3D) y audio generado con Web Audio.
+- `fonts/`: Kuronuri (serif de redacción, OFL) en subconjunto latino, niveles 0, 20, 50 y 100.
 - `README.md`: solo el título del repositorio.
 - `personalidad.md`: cómo debe trabajar el asistente.
 - `criterio.md`: reglas de decisión.

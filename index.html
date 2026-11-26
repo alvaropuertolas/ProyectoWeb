@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>Alvaro Puertolas — La batalla por mi atención</title>
   <!-- El nombre tiene que coincidir con el del archivo: style.css -->
-  <link rel="stylesheet" href="style.css?v=20261124">
+  <link rel="stylesheet" href="style.css?v=20261126u">
   <noscript>
     <style>
       body.is-intro { overflow: auto; }
@@ -28,18 +28,48 @@
     </svg>
   </button>
 
+  <!-- HUD de telemetría (decorativo) -->
+  <div class="hud" aria-hidden="true">
+    <div class="hud__c hud__c--tl">
+      <span>SUJETO · <b>alvaropuertolas</b></span>
+    </div>
+    <div class="hud__c hud__c--tr">
+      <span id="hudClock">00:00:00</span>
+      <span>41.3874° N / 2.1686° E</span>
+    </div>
+    <div class="hud__c hud__c--bl">
+      <span>ESTADO · <b class="hud__accent" id="hudStatus">ADQUIRIENDO</b></span>
+      <span id="hudGaze">MIRADA X +000.0 / Y +000.0</span>
+    </div>
+    <div class="hud__c hud__c--br">
+      <span id="hudCount">REGISTROS 00.000</span>
+      <span><b id="hudPanel">[01 / 03]</b> <span id="hudPanelName">PORTADA</span></span>
+    </div>
+    <div class="hud__ticks"></div>
+  </div>
+
   <main>
 
     <section class="panel panel--cover">
       <div class="panel-inner">
-        <p class="kicker">Algoritmo vs Voluntad</p>
-        <h1><span>alvaro</span><span>puertolas</span></h1>
+        <p class="kicker" data-decode>Algoritmo vs Voluntad</p>
+        <h1 class="thesis">La batalla<br>por mi atención.</h1>
+        <div class="cover-foot">
+          <p class="byline">alvaropuertolas</p>
+          <dl class="sample">
+            <dt>Muestra Nº 001</dt><dd>Mi historial de YouTube</dd>
+            <dt>Periodo</dt><dd>2019 — 2025</dd>
+            <dt>Vídeos</dt><dd>39.839</dd>
+            <dt>Búsquedas</dt><dd>7.446</dd>
+          </dl>
+        </div>
       </div>
     </section>
 
     <section class="panel panel--question">
       <div class="panel-inner">
         <p class="question">¿Consumo lo que <em>yo decido</em> buscar o lo que la página de inicio <em>me sirve en bandeja</em>?</p>
+        <p class="tease" data-decode>39.839 vídeos. ¿Cuántos elegí yo?</p>
       </div>
     </section>
 
@@ -54,13 +84,34 @@
   <div class="room" id="room" hidden>
     <div class="room__bar">
       <button class="room__back" type="button">← volver</button>
-      <span class="room__status">datos · en construcción</span>
+    </div>
+    <article class="card" id="roomCard" aria-live="polite">
+      <h2 class="card__year" id="cardYear">2019</h2>
+      <p class="card__beat" id="cardBeat"></p>
+      <dl class="card__stats" id="cardStats"></dl>
+      <div class="split" aria-hidden="true">
+        <div class="split__bar"><span class="split__algo" id="splitAlgo"></span></div>
+        <div class="split__legend"><span>ALGORITMO <b id="splitA">0%</b></span><span>VOLUNTAD <b id="splitV">0%</b></span></div>
+      </div>
+    </article>
+    <section class="verdict" id="verdict" aria-live="polite">
+      <p class="sr-only">Veredicto 2025: el 86 % de lo que vi no lo elegí yo.</p>
+      <dl class="verdict__foot">
+        <dt>vídeos que no busqué, 2023—25</dt><dd>≈ 29.300</dd>
+        <dt>lo que elegí yo</dt><dd>14 %</dd>
+        <dt>vídeos por búsqueda, 2025</dt><dd>5,6</dd>
+      </dl>
+      <p class="verdict__ask">¿Y tú, cuántos eliges?</p>
+    </section>
+    <div class="room__tele" aria-hidden="true">
+      <span id="teleZ">PROFUNDIDAD 0000</span>
+      <span id="teleHead">TU CONTROL 100%</span>
     </div>
     <nav class="room__years" id="roomYears" aria-label="Años"></nav>
     <p class="room__hint room__hint--mouse">mueve el ratón · scroll para avanzar</p>
     <p class="room__hint room__hint--touch">arrastra para mirar y avanzar</p>
   </div>
 
-  <script src="script.js?v=20261124"></script>
+  <script src="script.js?v=20261126u"></script>
 </body>
 </html>
